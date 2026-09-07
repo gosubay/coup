@@ -52,7 +52,7 @@ body{
 button{font-family:inherit}
 
 /* ---------- App shell ---------- */
-#app{display:flex;flex-direction:column;height:100vh}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
 header.topbar{
   display:flex;align-items:center;gap:18px;
@@ -150,6 +150,7 @@ nav.tabs button.on{background:var(--panel2);color:var(--gold2);border-color:var(
   background:radial-gradient(circle at 33% 30%,#ffe9a8,#d9a423 62%,#8a6410);
   box-shadow:0 0 0 1px #00000055;display:inline-block}
 
+#meseat{display:contents}
 .hand{display:flex;gap:6px;justify-content:center}
 
 /* ---------- CARDS ---------- */
@@ -179,8 +180,8 @@ nav.tabs button.on{background:var(--panel2);color:var(--gold2);border-color:var(
 .card.facedown{transform:rotateY(180deg)}
 .card .front{border:1px solid #00000055}
 .card .cname{
-  font-size:8px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;
-  text-align:center;padding:4px 2px 3px;color:#fff;background:#0000003d;
+  font-size:7.5px;font-weight:800;letter-spacing:0;text-transform:uppercase;
+  text-align:center;padding:4px 1px 3px;white-space:nowrap;overflow:hidden;color:#fff;background:#0000003d;
   text-shadow:0 1px 2px #0008;
 }
 .seat.me .card .cname{font-size:9px;padding:5px 1px 4px;letter-spacing:.03em}
@@ -424,6 +425,109 @@ table.tbl tr:hover td{background:#ffffff07}
   .side{flex-basis:280px}
   .seat{width:136px}
 }
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.tbl{min-width:560px}
+
+/* ============================================================
+   RESPONSIVE — phones and small tablets
+   ============================================================ */
+@media (max-width:880px){
+  header.topbar{height:auto;min-height:46px;padding:6px 9px;gap:8px;flex-wrap:wrap}
+  .brand{font-size:12.5px;gap:7px}
+  .brand .mark{width:22px;height:22px;font-size:12px;border-radius:6px}
+  .brand span.sub{display:none}
+  nav.tabs{order:5;width:100%;margin:0;gap:3px;overflow-x:auto;scrollbar-width:none}
+  nav.tabs::-webkit-scrollbar{display:none}
+  nav.tabs button{flex:1 0 auto;white-space:nowrap;padding:6px 9px;font-size:11.5px}
+  .speedwrap span{display:none}
+  .speedwrap{gap:5px}
+  .speedwrap select{padding:4px 6px;font-size:11px}
+  #newGameBtn{padding:5px 9px !important;font-size:11px !important}
+
+  .mbox{min-width:0;width:min(420px,94vw);padding:20px 18px;border-radius:15px}
+  .mbox h2{font-size:18px}
+  .exch-cards{flex-wrap:wrap;gap:9px}
+  .exch-cards .card{width:66px;height:95px}
+  .doc{padding:22px 15px 70px}
+  .doc h1{font-size:24px}
+  .doc .lede{font-size:13.5px}
+  .rolegrid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+}
+
+/* Portrait phones: table stacks above the controls.
+   Only the opponents scroll — your own seat stays pinned to the bottom
+   of the table area, and the deck/banner sits just above the controls. */
+@media (max-width:880px) and (orientation:portrait){
+  #pane-play{flex-direction:column}
+
+  .tablewrap{
+    flex:1 1 auto;min-height:0;overflow:hidden;padding:0;
+    display:flex;flex-direction:column;
+    background:linear-gradient(180deg,#1b4c37 0%,var(--felt) 45%,var(--felt2) 100%);
+  }
+  .tablewrap::after,.felt-ring{display:none}
+  #fx{position:fixed;inset:0}          /* never scrolls away from the seats it draws onto */
+
+  #seats{
+    flex:1 1 auto;min-height:142px;overflow-y:auto;width:100%;
+    display:flex;flex-wrap:wrap;align-content:flex-start;gap:7px;padding:8px;
+  }
+  .seat{position:static;transform:none;width:calc(50% - 4px);min-width:0;padding:6px 7px 7px}
+  .seat .card{width:46px;height:66px}
+  .seat-head{margin-bottom:5px}
+  .chips{margin-top:4px;min-height:0}
+  .seat.targetable:hover,.seat.active{transform:none}
+  #meseat{
+    display:block;flex:0 0 auto;width:100%;padding:0 8px 2px;
+  }
+  .seat.me{
+    width:100%;min-width:0;
+    background:linear-gradient(180deg,#1a2432,#0f1620);
+    box-shadow:0 -7px 20px rgba(0,0,0,.55);
+  }
+  .seat.me .card{width:62px;height:89px}
+  .seat.me .card .cname{font-size:8px;letter-spacing:0;padding:4px 1px 3px}
+
+  .center{
+    position:static;transform:none;width:100%;flex:0 0 auto;
+    flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;
+    gap:8px;padding:4px 8px 7px;
+  }
+  .deckpile,.deckpile .card{width:32px;height:46px}
+  .deckcount{font-size:9px}
+  .banner{flex:1 1 100%;min-height:0;font-size:12.5px}
+
+  .side{flex:0 0 auto;max-height:44vh;width:100%;border-left:none;border-top:1px solid var(--line)}
+  .side-sec{padding:8px 12px}
+  .side-sec:has(+ .logbox){padding:6px 12px 2px}
+  .side-sec h3{margin-bottom:6px}
+  .prompt-txt{font-size:12.5px;margin-bottom:8px}
+  .acts{gap:6px}
+  .btn{padding:8px 9px;font-size:12px}
+  .logbox{padding:4px 12px 12px;max-height:16vh;flex:0 1 auto}
+  .log-e{font-size:11px;padding:3px 0 3px 8px}
+}
+
+/* Short portrait phones: trim further so a full opponent row still fits. */
+@media (max-width:880px) and (orientation:portrait) and (max-height:820px){
+  #seats{min-height:132px}
+  .seat .card{width:43px;height:62px}
+  .seat.me .card{width:56px;height:81px}
+  .side{max-height:46vh}
+  .logbox{max-height:13vh}
+  .btn{padding:7px 8px}
+}
+
+/* Landscape phones: keep two columns, just tighter. */
+@media (max-width:900px) and (orientation:landscape){
+  .side{flex:0 0 236px}
+  .side-sec{padding:8px 10px}
+  .btn{padding:7px 8px;font-size:11.5px}
+  .seat{width:126px;padding:6px 7px 7px}
+  .seat .card{width:48px;height:69px}
+  .seat.me{min-width:210px}
+  .seat.me .card{width:60px;height:86px}
+}
 </style>
 </head>
 <body>
@@ -458,6 +562,7 @@ table.tbl tr:hover td{background:#ffffff07}
     <div class="tablewrap" id="tablewrap">
       <div class="felt-ring"></div>
       <div id="seats"></div>
+      <div id="meseat"></div>
       <div class="center">
         <div class="deckpile" id="deckpile">
           <div class="card facedown"><div class="face back"><div class="crest">C</div></div></div>
@@ -516,7 +621,7 @@ table.tbl tr:hover td{background:#ffffff07}
       </ul>
 
       <h2>Actions</h2>
-      <table class="tbl">
+      <div class="tblwrap"><table class="tbl">
         <thead><tr><th>Action</th><th>Character</th><th>Cost</th><th>Effect</th><th>Challengeable</th><th>Blocked by</th></tr></thead>
         <tbody>
           <tr><td><strong>Income</strong></td><td>—</td><td>—</td><td>Take 1 coin</td><td><span class="pill n">No</span></td><td><span class="pill n">Nothing</span></td></tr>
@@ -527,7 +632,7 @@ table.tbl tr:hover td{background:#ffffff07}
           <tr><td><strong>Steal</strong></td><td>Captain</td><td>—</td><td>Take 2 coins from target</td><td><span class="pill y">Yes</span></td><td>Captain, Ambassador</td></tr>
           <tr><td><strong>Exchange</strong></td><td>Ambassador</td><td>—</td><td>Draw 2, keep any, return 2</td><td><span class="pill y">Yes</span></td><td><span class="pill n">Nothing</span></td></tr>
         </tbody>
-      </table>
+      </table></div>
 
       <h2>Challenges</h2>
       <p>A challenge says: <em>"you don't have that card."</em> The claimant must prove it.</p>
@@ -803,9 +908,14 @@ function seatPositions(n){
 function render(){
   const box = $("#seats");
   const pos = seatPositions(G.players.length);
-  if(box.children.length !== G.players.length){
+  if(box.dataset.n !== String(G.players.length)){
     box.innerHTML = G.players.map((p,i)=>`<div class="seat" id="seat${p.id}"
         style="left:${pos[i].x}%;top:${pos[i].y}%"></div>`).join("");
+    // The human seat lives in its own container so it can sit outside the
+    // scrolling opponent grid on narrow screens. #meseat is display:contents
+    // on wide screens, so the absolute table layout is unaffected.
+    $("#meseat").appendChild($("#seat"+G.humanId));
+    box.dataset.n = String(G.players.length);
   }
   G.players.forEach((p,i)=>{
     const el = $("#seat"+p.id);
@@ -860,7 +970,7 @@ const FX = $("#fx");
 
 function centerOf(el){
   const r = el.getBoundingClientRect();
-  const b = $("#tablewrap").getBoundingClientRect();
+  const b = FX.getBoundingClientRect();     // works whether #fx is absolute or fixed
   return { x: r.left - b.left + r.width/2, y: r.top - b.top + r.height/2 };
 }
 const seatEl = id => $("#seat"+id);
@@ -1799,7 +1909,7 @@ function startGame(){
   }
   G.turn = 0;
   G.running = true;
-  $("#seats").innerHTML="";
+  $("#seats").innerHTML=""; $("#seats").dataset.n=""; $("#meseat").innerHTML="";
   $("#logbox").innerHTML="";
   render();
   log(`New game — ${cfg.players} players, ${{easy:"Casual",normal:"Standard",hard:"Ruthless"}[cfg.level]} AI.`, "turn");
