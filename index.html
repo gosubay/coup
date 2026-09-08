@@ -409,24 +409,80 @@ table.tbl tr:hover td{background:#ffffff07}
 }
 .note p{margin:0;font-size:13px}
 
-.soon{
-  height:100%;min-height:60vh;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:14px;text-align:center;padding:60px 20px;
-}
-.soon .badge{
-  font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
-  border:1px solid #e8b84b55;background:#e8b84b12;padding:6px 14px;border-radius:20px;font-weight:800;
-}
-.soon h1{font-size:32px;margin:6px 0 0}
-.soon p{color:var(--muted);max-width:56ch;line-height:1.7;font-size:14px;margin:0}
-.soon .glyph{opacity:.25}
-
 @media (max-width:1080px){
   .side{flex-basis:280px}
   .seat{width:136px}
 }
 .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table.tbl{min-width:560px}
+
+/* ============================================================
+   GTO STRATEGY + SOLVER TABS
+   ============================================================ */
+.doc .sub{color:var(--dim);font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;margin:26px 0 10px}
+.doc .cap{font-size:11.5px;color:var(--dim);line-height:1.55;margin:6px 0 22px}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin:20px 0 8px}
+.kpi{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 15px}
+.kpi .k{font-size:23px;font-weight:800;color:var(--gold2);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-top:5px;font-weight:800}
+.kpi .s{font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.45}
+
+.stack{display:flex;height:17px;border-radius:5px;overflow:hidden;background:#00000055;min-width:130px}
+.stack i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:9px 15px;margin:14px 0 2px;font-size:11.5px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:block;flex:0 0 auto}
+
+.mini{height:8px;border-radius:5px;background:#ffffff12;overflow:hidden;min-width:64px;display:block}
+.mini i{display:block;height:100%;background:linear-gradient(90deg,var(--gold2),#b8860b)}
+.mini.g i{background:linear-gradient(90deg,#5fe0a4,#177a4d)}
+.mini.r i{background:linear-gradient(90deg,#ff7a7a,#8b1d1d)}
+.barcell{display:flex;align-items:center;gap:9px}
+.barcell b{font-variant-numeric:tabular-nums;font-weight:700;color:var(--text);font-size:12px;min-width:44px;text-align:right}
+
+table.tbl td.num,table.tbl th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.tbl td.heat{text-align:center;font-variant-numeric:tabular-nums;font-weight:800;font-size:12px;color:#fff}
+table.tbl.tight td,table.tbl.tight th{padding:6px 9px}
+table.tbl.tight{min-width:640px}
+table.tbl tbody tr.hi td{background:#e8b84b0e}
+
+.laws{counter-reset:law;margin:18px 0 0;padding:0;list-style:none}
+.laws>li{
+  counter-increment:law;position:relative;padding:0 0 0 46px;margin:0 0 22px;
+}
+.laws>li::before{
+  content:counter(law);position:absolute;left:0;top:-2px;width:30px;height:30px;border-radius:9px;
+  background:linear-gradient(145deg,var(--gold2),#b8860b);color:#2a1d00;font-weight:900;font-size:14px;
+  display:grid;place-items:center;box-shadow:0 2px 8px rgba(232,184,75,.3);
+}
+.laws h3{margin:3px 0 6px;font-size:15.5px;color:#fff}
+.laws p{margin:0 0 7px}
+.laws .why{font-size:12.5px;color:var(--muted);border-left:2px solid var(--line2);padding-left:11px;margin-top:9px}
+
+.cheat{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:4px 18px 14px;margin:18px 0}
+.cheat h3{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:16px 0 8px}
+.cheat ul{margin:0;padding-left:19px}
+.cheat li{font-size:13px;margin:5px 0}
+.cheat .k{color:var(--gold2);font-weight:700}
+
+.matrix{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;max-width:520px;margin:16px 0 6px}
+.matrix .mh{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:800;display:grid;place-items:center;text-align:center;padding:4px}
+.matrix .mc{border:1px solid var(--line);border-radius:11px;padding:13px 10px;text-align:center;background:var(--panel)}
+.matrix .mc b{display:block;font-size:21px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.matrix .mc span{display:block;font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.35}
+
+.callout{border:1px solid var(--line2);background:linear-gradient(160deg,#1c2836,#151d28);border-radius:14px;padding:16px 18px;margin:20px 0}
+.callout h3{margin:0 0 7px;font-size:14px;color:var(--gold2)}
+.callout p:last-child{margin-bottom:0}
+
+.schema{background:#00000045;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.9;color:#c6d3e2;overflow-x:auto}
+.schema b{color:var(--gold2);font-weight:700}
+.schema em{color:var(--dim);font-style:normal}
+
+.warn{border-left:3px solid var(--danger);background:#e04a4a10;padding:12px 16px;border-radius:0 10px 10px 0;margin:16px 0}
+.warn p{margin:0;font-size:13px}
 
 /* ============================================================
    RESPONSIVE — phones and small tablets
@@ -684,23 +740,366 @@ table.tbl{min-width:560px}
 
   <!-- ================= GTO ================= -->
   <section class="pane" id="pane-gto">
-    <div class="soon">
-      <div class="glyph" id="gtoGlyph"></div>
-      <div class="badge">Coming soon</div>
+    <div class="doc">
       <h1>GTO Strategy</h1>
-      <p>This tab will host the equilibrium strategy tables — bluff and challenge frequencies by
-      information set, coin count and player count — once the CFR run converges.</p>
+      <p class="lede">
+        Everything below is read off a heads-up counterfactual-regret solve of this exact rule set —
+        219,187 information sets, no human theory added. The solver plays a <em>mixed</em> strategy: it
+        does not tell you what to do, it tells you how often. This page is the translation of those
+        frequencies into something you can actually hold in your head at the table.
+      </p>
+
+      <div class="callout">
+        <h3>The whole solution in one sentence</h3>
+        <p>Take the action your cards support, take Foreign Aid when they support nothing, bluff the
+        Assassin far more than you bluff anything else, and challenge only when you have two influences
+        and your opponent has one.</p>
+      </div>
+
+      <h2>The nine laws</h2>
+      <ol class="laws">
+
+        <li>
+          <h3>Foreign Aid is the engine. Income is the fallback.</h3>
+          <p>Below three coins the solver takes <strong>Foreign Aid 30–38%</strong> of the time and
+          <strong>Income 18–22%</strong>. Across every coin count it is the most common single action in
+          the solution at <strong>21.6%</strong> of all turns — ahead of Assassinate at 19.8% and Income
+          at 16.0%.</p>
+          <p class="why">Why: Foreign Aid cannot be challenged. The only way to stop it is a Duke claim,
+          and that claim is itself challengeable — so stopping you costs your opponent risk, while taking
+          it costs you none. It is the only place in Coup where you get a free roll.</p>
+        </li>
+
+        <li>
+          <h3>Claim what you hold. Bluff the rest a few percent of the time.</h3>
+          <p>Given the chance, the solver claims <strong>Tax 5.2%</strong>, <strong>Steal 3.5%</strong> and
+          <strong>Exchange 1.6%</strong> of the time <em>without</em> the card — against 39%, 36% and 25%
+          <em>with</em> it. Because you hold any given role only about a quarter to a third of the time,
+          that still leaves <strong>29% of Tax claims, 17% of Steals and 15% of Exchanges as
+          bluffs</strong>.
+          <p class="why">Why: that ratio is exactly what makes a challenge break even. Bluff more and
+          challenges become profitable; bluff less and you leave value on the table when you actually
+          hold the card.</p>
+        </li>
+
+        <li>
+          <h3>The Assassin is the exception — bluff it hard.</h3>
+          <p>Without an Assassin the solver still assassinates <strong>17.7%</strong> of the time it can
+          afford to. <strong>Four in ten assassination attempts at equilibrium are bluffs</strong> — by
+          far the loosest claim in the game.</p>
+          <p class="why">Why: an assassination forces an immediate answer. If it is not challenged and not
+          blocked, it takes half of everything your opponent has for three coins. A caught bluff costs one
+          influence and the coins; a successful one is usually decisive. Nothing else in the game pays like
+          that.</p>
+        </li>
+
+        <li>
+          <h3>Challenging is a luxury of the two-influence player.</h3>
+          <p>Challenge frequency against Tax, Steal and Exchange, by influence count:</p>
+          <div class="matrix" id="gtoMatrix"></div>
+          <p class="why">Why: a lost challenge costs one influence. On two influences that is a bruise; on
+          one it is the game. And a <em>won</em> challenge against a one-influence opponent ends the game
+          on the spot — so the same call is worth three times as much when they are short.</p>
+        </li>
+
+        <li>
+          <h3>Count copies before you call.</h3>
+          <p>There are three of each card. Everything you can see — your own hand plus every face-up
+          revealed card — is a copy your opponent cannot have. Challenge rate against a claim, by copies
+          visible to you:</p>
+          <div class="tblwrap"><table class="tbl tight" id="gtoCopies"></table></div>
+          <p class="why">Why: with all three copies accounted for, the claim is a certain bluff and the
+          challenge is free money — the solver takes it 56–88% of the time and only misses because those
+          positions are rare enough to stay slightly unconverged. This is the single largest, most
+          reliable edge available to a human player, and it requires no reads at all — only counting.</p>
+        </li>
+
+        <li>
+          <h3>Blocks are bluffed about as often as they are honest.</h3>
+          <p>Honest share of each block at equilibrium: Duke blocks Foreign Aid <strong>56%</strong>,
+          Captain blocks Steal <strong>57%</strong>, Contessa blocks assassination <strong>59%</strong>,
+          Ambassador blocks Steal <strong>64%</strong>. A block is a much weaker signal than an action.</p>
+          <p class="why">Why: a block is defensive, so it is cheap to attempt — you only pay if you are
+          challenged. Actions cost tempo and coins whether or not they are believed, which is why claims
+          made on your own turn are 71–85% honest and blocks are not.</p>
+        </li>
+
+        <li>
+          <h3>Doubt the Contessa. Believe everything else.</h3>
+          <p>The solver challenges a Contessa block <strong>49%</strong> of the time. It challenges a Duke
+          block of Foreign Aid <strong>10%</strong>, a Captain block <strong>11%</strong>, an Ambassador
+          block <strong>11%</strong>.</p>
+          <p class="why">Why: the other three blocks defend two or three coins. The Contessa block defends
+          an influence, and if you break it the assassination lands on top of the lost challenge — a double
+          kill for three coins. Same claim, five times the prize.</p>
+        </li>
+
+        <li>
+          <h3>On your last influence, facing an assassin, never fold.</h3>
+          <p>With a Contessa: block <strong>96%</strong>. Without one: bluff-block <strong>61%</strong>,
+          challenge <strong>38%</strong>, pass <strong>0.9%</strong>. On two influences with no Contessa
+          the same spot is a fold <strong>91%</strong> of the time.</p>
+          <p class="why">Why: passing is death, so every alternative is better regardless of the odds. The
+          split between bluff-blocking and challenging is there to stop your opponent reading you — the
+          bluff-block is the larger half because a challenge is right only when they actually lack the
+          Assassin, while a block wins whenever it goes unchallenged.</p>
+        </li>
+
+        <li>
+          <h3>Watch the seven-coin line — theirs and yours.</h3>
+          <p>The Foreign Aid block rate sits near <strong>25%</strong> while the opponent is poor and jumps
+          to <strong>42%, 47%, 49%</strong> as they reach 7, 8 and 9 coins. Steals concentrate on the
+          opponent sitting at 7–8 coins (<strong>56% / 51%</strong>). At 7–9 coins yourself the solver
+          coups <strong>45–63%</strong> of the time with no Assassin, but prefers to assassinate
+          <strong>(34–54%)</strong> when it holds one.</p>
+          <p class="why">Why: seven coins converts money into a guaranteed influence. Everything before
+          that line is about reaching it first; everything after is about spending it before your opponent
+          can take it away.</p>
+        </li>
+
+      </ol>
+
+      <h2>Simplifications that cost almost nothing</h2>
+      <p>A human cannot run 219,187 frequencies. These six approximations reproduce most of the
+      solver's behaviour:</p>
+
+      <div class="cheat">
+        <h3>On your turn</h3>
+        <ul>
+          <li><span class="k">Hold the card?</span> Use it — Tax, Steal or Exchange about one turn in
+          three, mixing in Foreign Aid and Income so you are not readable.</li>
+          <li><span class="k">Hold nothing?</span> Foreign Aid. Take Income instead when a Duke is already
+          visible or your opponent has been blocking.</li>
+          <li><span class="k">Hold the Assassin and 3+ coins?</span> Assassinate — two thirds of the time.
+          Without one, still bluff it about one time in six.</li>
+          <li><span class="k">7 coins?</span> Coup, unless you hold an Assassin — then assassinate and keep
+          the coup in reserve. At 10, you have no choice.</li>
+        </ul>
+        <h3>On their turn</h3>
+        <ul>
+          <li><span class="k">Two influences vs their one?</span> Challenge about one claim in three.
+          Otherwise challenge roughly one in ten, and on your last influence almost never.</li>
+          <li><span class="k">Can you see two copies?</span> Roughly double your challenge rate. Three
+          copies — always challenge.</li>
+          <li><span class="k">Foreign Aid?</span> Block it a quarter of the time; block it half the time
+          once they are at seven coins, whether or not you hold the Duke.</li>
+          <li><span class="k">Steal?</span> Block it half the time. The claim matters less than the fact
+          that blocking is nearly free.</li>
+          <li><span class="k">Assassination on your last influence?</span> Block, or challenge. Never pass.</li>
+          <li><span class="k">They blocked your assassination?</span> Challenge it — this is a coin flip
+          the solver takes 49% of the time, and it is the only block worth doubting.</li>
+        </ul>
+      </div>
+
+      <h2>The three numbers that drive everything</h2>
+      <p>Strip the tables away and the entire solution is a function of three quantities. Every frequency
+      on this page moves when one of them moves, and almost nothing else matters:</p>
+      <ul>
+        <li><strong>Copies visible.</strong> How many of the claimed card you can already account for.
+        This sets challenge frequency, and it is pure arithmetic — no read required.</li>
+        <li><strong>Whose influence is cheaper.</strong> Two-vs-one is the aggression switch: the player
+        with the spare influence challenges three times as often and bluffs more, the player on one
+        influence stops calling almost entirely.</li>
+        <li><strong>Distance to seven coins.</strong> Coins have no value except as a coup, so the closer
+        either player is to seven, the more the game turns into a race — blocks tighten, steals target the
+        leader, and cheap actions stop being worth a turn.</li>
+      </ul>
+
+      <div class="note"><p>
+        The solver plays two-handed Coup. With more players the arithmetic of copies is unchanged, but
+        challenges get cheaper for the table and more expensive for you — a challenge you win removes an
+        influence that everyone shares the benefit of. Expect real multi-way play to challenge <em>less</em>
+        than these numbers, not more.
+      </p></div>
+
+      <p class="cap">Frequencies are reach-weighted averages over the solver's converged policy — each
+      information set counted in proportion to how often equilibrium play actually reaches it. The
+      underlying run, its structure and its convergence diagnostics are in the <strong>Solver</strong> tab.</p>
     </div>
   </section>
 
   <!-- ================= SOLVER ================= -->
   <section class="pane" id="pane-solver">
-    <div class="soon">
-      <div class="glyph" id="solverGlyph"></div>
-      <div class="badge">Coming soon</div>
+    <div class="doc">
       <h1>Solver</h1>
-      <p>This tab will run counterfactual regret minimisation in the browser and let you inspect
-      convergence, exploitability and the resulting policy for any position.</p>
+      <p class="lede">
+        A counterfactual-regret-minimisation run over heads-up Coup, loaded from
+        <code>coup_gto_strategy.pkl</code>. This tab is the autopsy: what the run actually contains, how
+        the information sets are encoded, how far it converged, and what the raw policy looks like before
+        anyone rounds it into advice.
+      </p>
+
+      <div class="kpis" id="solKpis"></div>
+
+      <h2>What is in the file</h2>
+      <p>The pickle is a single dictionary mapping an information-set key to a regret node. Nothing else —
+      no game engine, no iteration counter, no exploitability trace. Each node carries two vectors the
+      length of the legal action list at that node:</p>
+      <div class="schema">
+<b>key</b> = ( me_influence, opp_influence, me_coins, opp_coins,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my_hand, revealed, phase, pending_action, pending_block )<br>
+<b>node</b> = { regret_sum: [float], strategy_sum: [float] }
+      </div>
+      <p>Every slot is written from the perspective of <em>whoever is to move at that node</em> — in a
+      response node the “me” fields belong to the responder, not the player who declared. That is what
+      makes the same table usable by both seats.</p>
+
+      <div class="tblwrap"><table class="tbl tight">
+        <thead><tr><th>Slot</th><th>Field</th><th>Range</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td class="num">0</td><td><code>me_influence</code></td><td>1–2</td><td>Live cards held by the player to move</td></tr>
+          <tr><td class="num">1</td><td><code>opp_influence</code></td><td>1–2</td><td>Live cards held by the other player</td></tr>
+          <tr><td class="num">2</td><td><code>me_coins</code></td><td>0–12</td><td>Coins of the player to move</td></tr>
+          <tr><td class="num">3</td><td><code>opp_coins</code></td><td>0–12</td><td>Coins of the other player</td></tr>
+          <tr><td class="num">4</td><td><code>my_hand</code></td><td>sorted tuple</td><td>The mover's own live cards — the private information</td></tr>
+          <tr><td class="num">5</td><td><code>revealed</code></td><td>sorted tuple</td><td>Every face-up card, both players pooled together</td></tr>
+          <tr><td class="num">6</td><td><code>phase</code></td><td>0 / 1 / 2</td><td>Take an action · respond to an action · respond to a block</td></tr>
+          <tr><td class="num">7</td><td><code>pending_action</code></td><td>action or —</td><td>The claim being responded to</td></tr>
+          <tr><td class="num">8</td><td><code>pending_block</code></td><td>block or —</td><td>The block being responded to</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note"><p>
+        The <code>revealed</code> slot pools both players' dead cards into one multiset — the solver does
+        not track <em>who</em> revealed what. That is a deliberate abstraction: it keeps the tree small and
+        it is the same information a card-counting human uses. It also means the solver cannot form reads
+        about a specific opponent's history, only about how many copies remain.
+      </p></div>
+
+      <h2>Abstraction and its limits</h2>
+      <ul>
+        <li><strong>Two players only.</strong> Every three-plus-player effect — who challenges first, the
+        shared benefit of removing someone else's influence — is outside the model.</li>
+        <li><strong>Exchange is collapsed.</strong> The Ambassador's draw-two-keep-two is treated as a claim
+        with an outcome, not as a decision node over which cards to keep.</li>
+        <li><strong>Which card you reveal on a loss is not a decision.</strong> It is folded into the state
+        transition.</li>
+        <li><strong>Coins cap at 12.</strong> Above ten you must coup, so the tail is unreachable in practice.</li>
+        <li><strong>No opponent modelling.</strong> Equilibrium play, not exploitative play — it is
+        unexploitable, not maximally profitable against a bad player.</li>
+      </ul>
+
+      <h2>Where the tree lives</h2>
+      <p class="cap">Information sets by decision phase, with the share of equilibrium reach probability
+      each phase carries. Response nodes outnumber action nodes almost four to one — most of Coup is
+      deciding whether to believe someone.</p>
+      <div class="tblwrap"><table class="tbl tight" id="solPhases"></table></div>
+
+      <h2>Action encoding</h2>
+      <p>The legal action list at a node is filtered from a fixed order, and the regret vector indexes into
+      that filtered list — so index 3 means different things at different coin counts. Recovering this
+      ordering is what makes the file readable at all:</p>
+      <div class="tblwrap"><table class="tbl tight">
+        <thead><tr><th>Phase</th><th>Condition</th><th>Legal list, in index order</th></tr></thead>
+        <tbody>
+          <tr><td>Action</td><td>0–2 coins</td><td>Income · Foreign&nbsp;Aid · Tax · Steal · Exchange</td></tr>
+          <tr><td>Action</td><td>3–6 coins</td><td>Income · Foreign&nbsp;Aid · Tax · Steal · Exchange · Assassinate</td></tr>
+          <tr><td>Action</td><td>7–9 coins</td><td>Income · Foreign&nbsp;Aid · Tax · Steal · Exchange · Assassinate · Coup</td></tr>
+          <tr><td>Action</td><td>10+ coins</td><td>Coup</td></tr>
+          <tr><td>Respond</td><td>vs Foreign Aid</td><td>Pass · Block&nbsp;(Duke)</td></tr>
+          <tr><td>Respond</td><td>vs Tax / Exchange</td><td>Pass · Challenge</td></tr>
+          <tr><td>Respond</td><td>vs Assassinate</td><td>Pass · Challenge · Block&nbsp;(Contessa)</td></tr>
+          <tr><td>Respond</td><td>vs Steal</td><td>Pass · Challenge · Block&nbsp;(Captain) · Block&nbsp;(Ambassador)</td></tr>
+          <tr><td>Respond</td><td>vs any block</td><td>Accept · Challenge&nbsp;the&nbsp;block</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Convergence</h2>
+      <p>There is no exploitability number in the file, so convergence has to be inferred. Three proxies,
+      all pointing the same way — the high-traffic core of the tree is settled, the tail is not:</p>
+
+      <div class="kpis" id="solConv"></div>
+
+      <p class="sub">Policy sharpness</p>
+      <p class="cap">How decisive the average strategy is at each information set. A converged Coup
+      solution should be genuinely mixed in the middle of the tree and pure at the edges — which is what
+      this distribution shows.</p>
+      <div class="tblwrap"><table class="tbl tight" id="solPurity"></table></div>
+
+      <p class="sub">Coverage</p>
+      <p class="cap">Reach probability is extremely concentrated. Half of all equilibrium play happens in
+      4% of the information sets; the 49% of nodes with the least traffic carry 1% of it between them.</p>
+      <div class="tblwrap"><table class="tbl tight" id="solCoverage"></table></div>
+
+      <div class="warn"><p>
+        <strong>Read the tail with suspicion.</strong> 12.6% of information sets were visited fewer than
+        100 times. Their averaged strategies are close to arbitrary — visible in the opening chart below,
+        where a couple of rare hands produce frequencies that clearly have not settled. Aggregates over
+        many nodes are trustworthy; any single rare node is not.
+      </p></div>
+
+      <h2>Turn policy by coin count</h2>
+      <p class="cap">Reach-weighted action frequencies at every coin count, across all hands. The three
+      regime changes are visible without any interpretation: Assassinate opens at 3, Coup opens at 7 and
+      immediately takes about half the weight, and at 10 everything collapses to a single legal move.</p>
+      <div class="legend" id="solLegend"></div>
+      <div class="tblwrap"><table class="tbl tight" id="solTurn"></table></div>
+
+      <h2>Opening chart</h2>
+      <p class="cap">The exact policy at the opening node — both players on two influences and two coins,
+      nothing revealed. All 15 starting hands. Cells are the solver's mixing frequency; the rightmost
+      column is how much traffic that hand's node actually received.</p>
+      <div class="tblwrap"><table class="tbl tight" id="solRoot"></table></div>
+
+      <h2>Responding to a claim</h2>
+      <p class="cap">What the solver does when a claim is made against it, aggregated over every position.</p>
+      <div class="tblwrap"><table class="tbl tight" id="solResp"></table></div>
+
+      <p class="sub">Challenge rate vs copies visible</p>
+      <p class="cap">Copies of the claimed card the responder can see, counting their own hand and every
+      face-up card. Three copies means the claim is provably false.</p>
+      <div class="tblwrap"><table class="tbl tight" id="solCopies"></table></div>
+
+      <p class="sub">Bluff rates, action side</p>
+      <p class="cap">How often each claim is made with and without the card behind it, and what share of
+      claims are consequently honest. The right-hand column is the challenge rate the solver applies to
+      that claim — the two are in equilibrium with each other.</p>
+      <div class="tblwrap"><table class="tbl tight" id="solClaim"></table></div>
+
+      <p class="sub">Bluff rates, block side</p>
+      <p class="cap">The same decomposition for blocks. Blocks are bluffed far more often than actions,
+      and the Contessa block is challenged five times as often as any other.</p>
+      <div class="tblwrap"><table class="tbl tight" id="solBlock"></table></div>
+
+      <h2>Pressure effects</h2>
+      <p class="sub">Challenge rate by influence count</p>
+      <p class="cap">Against Tax, Steal and Exchange. The single largest behavioural swing in the solution.</p>
+      <div class="matrix" id="solMatrix"></div>
+
+      <p class="sub">Facing an assassination</p>
+      <div class="tblwrap"><table class="tbl tight" id="solAssassin"></table></div>
+
+      <p class="sub">The seven-coin line</p>
+      <p class="cap">Left: how often Foreign Aid gets blocked as the acting player approaches a coup.
+      Right: how often a Captain-holder chooses to steal, by the target's coin count.</p>
+      <div class="tblwrap"><table class="tbl tight" id="solCoins"></table></div>
+
+      <p class="sub">Coup or assassinate</p>
+      <div class="tblwrap"><table class="tbl tight" id="solCoup"></table></div>
+
+      <h2>Method</h2>
+      <p>The action and card enumerations are not stored in the pickle — only integer tags. They were
+      recovered from the structure itself, which is worth recording because it is the part that could
+      silently go wrong:</p>
+      <ul>
+        <li><strong>Cards</strong> from block behaviour: the response option that spikes when a given card
+        is in hand identifies the card. Holding tag 4 raises the third option against pending action 4
+        from 37% to 62% — tag 4 is the Contessa, and that option is the Contessa block. The same test
+        fixes Duke, Captain and Ambassador; the Assassin falls out by elimination and is confirmed by the
+        card-removal effect on challenge rate.</li>
+        <li><strong>Actions</strong> from arity: the pending action with four responses can only be Steal,
+        the one with three is Assassinate, and the two that admit a Duke block or no block at all separate
+        Foreign Aid from Tax and Exchange.</li>
+        <li><strong>Legal-list order</strong> from the same conditional spikes at action nodes, which is
+        how Assassinate turns out to sit after Exchange rather than in enum position.</li>
+        <li><strong>Averaging</strong> is <code>strategy_sum</code> normalised over positive entries — the
+        CFR average strategy, which is the object that converges, not the current regret-matching policy.
+        Aggregates weight each information set by its accumulated reach mass.</li>
+      </ul>
+      <p class="cap">All frequencies on this tab and on the GTO Strategy tab are computed from the file by
+      this method; nothing is hand-authored. <code>tools/analyze_cfr.py</code> reproduces the embedded
+      blob byte for byte — it re-derives the encodings, fails loudly if the self-check does not hold, and
+      prints the same JSON.</p>
     </div>
   </section>
 
@@ -1954,14 +2353,222 @@ function buildRoleGrid(){
                :`<div class="rc-line"><span class="rc-tag non">Block</span><span>Blocks nothing</span></div>`}
       </div></div>`;
   }).join("");
-  $("#gtoGlyph").innerHTML    = `<div style="width:90px">${ART.ambassador}</div>`;
-  $("#solverGlyph").innerHTML = `<div style="width:90px">${ART.duke}</div>`;
 }
 
 /* expose for the solver work later */
 window.Coup = {G, ACTIONS, ROLES, CoupAI, buildInfoSet, infoSetKey, legalActions, bluffSuspicion};
 
+
+/* ============================================================
+   CFR ANALYSIS — GTO Strategy + Solver tabs
+   Everything below is derived from coup_gto_strategy.pkl:
+   219,187 information sets of a heads-up CFR solve. The blob is
+   the reach-weighted aggregate; see the Solver tab for method.
+   ============================================================ */
+const CFR = {"meta":{"infosets":219187,"byPhase":{"0":30083,"1":110604,"2":78500},"massByPhase":{"0":8885879142,"1":10332988338,"2":2287071735},"totalMass":21505939215},"turnByCoins":{"0":{"Income":0.1939,"ForeignAid":0.3576,"Tax":0.182,"Steal":0.1448,"Exchange":0.1217},"1":{"Income":0.1816,"ForeignAid":0.3782,"Tax":0.1322,"Steal":0.1751,"Exchange":0.1328},"2":{"Income":0.2233,"ForeignAid":0.3022,"Tax":0.1173,"Steal":0.2616,"Exchange":0.0955},"3":{"Income":0.1063,"ForeignAid":0.1457,"Tax":0.0829,"Steal":0.112,"Exchange":0.0634,"Assassinate":0.4899},"4":{"Income":0.099,"ForeignAid":0.1546,"Tax":0.219,"Steal":0.104,"Exchange":0.0681,"Assassinate":0.3552},"5":{"Income":0.1251,"ForeignAid":0.2617,"Tax":0.1695,"Steal":0.1265,"Exchange":0.0511,"Assassinate":0.2661},"6":{"Income":0.3271,"ForeignAid":0.114,"Tax":0.0971,"Steal":0.0851,"Exchange":0.0433,"Assassinate":0.3334},"7":{"Income":0.0913,"ForeignAid":0.0578,"Tax":0.0673,"Steal":0.0592,"Exchange":0.0368,"Assassinate":0.1112,"Coup":0.5765},"8":{"Income":0.1332,"ForeignAid":0.0635,"Tax":0.0508,"Steal":0.0726,"Exchange":0.0719,"Assassinate":0.1288,"Coup":0.4792},"9":{"Income":0.0836,"ForeignAid":0.1012,"Tax":0.0617,"Steal":0.0406,"Exchange":0.0413,"Assassinate":0.2355,"Coup":0.4361},"10":{"Coup":1.0},"11":{"Coup":1.0},"12":{"Coup":1.0}},"claim":{"Tax":{"card":"Duke","with_card":0.386,"without":0.0522,"honest":0.7122,"challenged":0.1035},"Steal":{"card":"Captain","with_card":0.3607,"without":0.0352,"honest":0.828,"challenged":0.1059},"Exchange":{"card":"Ambassador","with_card":0.2474,"without":0.0156,"honest":0.8504,"challenged":0.1527},"Assassinate":{"card":"Assassin","with_card":0.6638,"without":0.1769,"honest":0.6004,"challenged":0.1165}},"root":{"acts":["Income","ForeignAid","Tax","Steal","Exchange"],"rows":[{"hand":["Duke","Duke"],"p":[0.5912,0.0188,0.208,0.1518,0.0302],"w":1214547},{"hand":["Duke","Assassin"],"p":[0.3824,0.0617,0.4195,0.1364,0.0],"w":3652427},{"hand":["Duke","Captain"],"p":[0.1602,0.189,0.5921,0.0587,0.0],"w":4915488},{"hand":["Duke","Ambassador"],"p":[0.3861,0.0869,0.499,0.028,0.0],"w":3770987},{"hand":["Duke","Contessa"],"p":[0.1474,0.1949,0.6319,0.0258,0.0],"w":3215222},{"hand":["Assassin","Assassin"],"p":[0.2958,0.0973,0.5588,0.0481,0.0],"w":1131819},{"hand":["Assassin","Captain"],"p":[0.0446,0.2882,0.2816,0.3856,0.0],"w":4858979},{"hand":["Assassin","Ambassador"],"p":[0.4665,0.2891,0.1283,0.0868,0.0293],"w":3875162},{"hand":["Assassin","Contessa"],"p":[0.1697,0.4329,0.3813,0.0161,0.0],"w":3146496},{"hand":["Captain","Captain"],"p":[0.4589,0.3833,0.1334,0.001,0.0234],"w":1276871},{"hand":["Captain","Ambassador"],"p":[0.2192,0.167,0.188,0.4014,0.0244],"w":4545644},{"hand":["Captain","Contessa"],"p":[0.0273,0.1725,0.4686,0.3316,0.0],"w":6355772},{"hand":["Ambassador","Ambassador"],"p":[0.0,0.3219,0.159,0.122,0.3971],"w":1228513},{"hand":["Ambassador","Contessa"],"p":[0.153,0.3045,0.0967,0.2542,0.1915],"w":4542900},{"hand":["Contessa","Contessa"],"p":[0.4198,0.0426,0.52,0.0171,0.0005],"w":915230}]},"resp":{"ForeignAid":{"Pass":0.7413,"BlockFA(Duke)":0.2587},"Tax":{"Pass":0.8965,"Challenge":0.1035},"Steal":{"Pass":0.3826,"Challenge":0.1059,"Block(Captain)":0.3011,"Block(Ambassador)":0.2104},"Exchange":{"Pass":0.8473,"Challenge":0.1527},"Assassinate":{"Pass":0.3875,"Challenge":0.1165,"Block(Contessa)":0.4959}},"blockerChal":{"Tax":{"0":{"chal":0.0825,"w":1352232827},"1":{"chal":0.1364,"w":649104536},"2":{"chal":0.1868,"w":78754807},"3":{"chal":0.5922,"w":1145876}},"Steal":{"0":{"chal":0.0834,"w":1144464398},"1":{"chal":0.1191,"w":871337129},"2":{"chal":0.2207,"w":115611443},"3":{"chal":0.5619,"w":2001417}},"Exchange":{"0":{"chal":0.1433,"w":1175229571},"1":{"chal":0.1612,"w":639037259},"2":{"chal":0.2153,"w":79777711},"3":{"chal":0.559,"w":1457009}},"Assassinate":{"0":{"chal":0.0715,"w":1057436046},"1":{"chal":0.1596,"w":658925455},"2":{"chal":0.3189,"w":88662256},"3":{"chal":0.8802,"w":1687620}}},"blockRates":{"Duke blocks Foreign Aid":{"with_card":0.534,"without":0.1569,"honest":0.557,"challenged":0.1013},"Contessa blocks Assassination":{"with_card":0.8095,"without":0.3172,"honest":0.5926,"challenged":0.4937},"Captain blocks Steal":{"with_card":0.513,"without":0.1941,"honest":0.5715,"challenged":0.1137},"Ambassador blocks Steal":{"with_card":0.4986,"without":0.1026,"honest":0.6449,"challenged":0.1118}},"p2blocker":{"Duke blocks Foreign Aid":{"0":{"chal":0.0863,"w":443944597},"1":{"chal":0.13,"w":170926871},"2":{"chal":0.1889,"w":18972140},"3":{"chal":0.7798,"w":152027}},"Contessa blocks Assassination":{"0":{"chal":0.3672,"w":368142897},"1":{"chal":0.597,"w":264200678},"2":{"chal":0.9208,"w":43727208},"3":{"chal":0.9982,"w":1267048}},"Captain blocks Steal":{"0":{"chal":0.1491,"w":206761595},"1":{"chal":0.0872,"w":288011122},"2":{"chal":0.1188,"w":42086411},"3":{"chal":0.2843,"w":558842}},"Ambassador blocks Steal":{"0":{"chal":0.0928,"w":302404656},"1":{"chal":0.1419,"w":126484595},"2":{"chal":0.3117,"w":9321498},"3":{"chal":0.865,"w":109550}}},"assassinDef":{"1|1":{"p":{"Pass":0.0129,"Challenge":0.0248,"Block(Contessa)":0.9624},"w":211188817},"1|0":{"p":{"Pass":0.0093,"Challenge":0.3808,"Block(Contessa)":0.6099},"w":516567526},"2|1":{"p":{"Pass":0.2598,"Challenge":0.0032,"Block(Contessa)":0.737},"w":444754739},"2|0":{"p":{"Pass":0.9099,"Challenge":0.0113,"Block(Contessa)":0.0787},"w":634200295}},"chalMatrix":{"2|2":{"chal":0.0938,"w":2146326467},"2|1":{"chal":0.313,"w":1460675440},"1|2":{"chal":0.0186,"w":1309968288},"1|1":{"chal":0.0402,"w":1193183788}},"faByCoins":{"0":0.2116,"1":0.1901,"2":0.2614,"3":0.2237,"4":0.2512,"5":0.2556,"6":0.2754,"7":0.42,"8":0.4677,"9":0.4944},"stealByCoins":{"0":0.2353,"1":0.1854,"2":0.2117,"3":0.4734,"4":0.372,"5":0.292,"6":0.4379,"7":0.5572,"8":0.5078,"9":0.3055},"coupVsAss":{"7|1":{"Coup":0.4038,"Assassinate":0.3409,"Income":0.1482},"7|0":{"Coup":0.6273,"Assassinate":0.0435,"Income":0.0745},"8|1":{"Coup":0.2998,"Assassinate":0.37,"Income":0.2665},"8|0":{"Coup":0.541,"Assassinate":0.0456,"Income":0.0872},"9|1":{"Coup":0.3936,"Assassinate":0.5411,"Income":0.0154},"9|0":{"Coup":0.4534,"Assassinate":0.1111,"Income":0.1113}},"diag":{"purity":{"mixed":69610,"lean":23939,"pure":108250,"wide":17388},"drift":0.0992,"entropy":{"0":0.675,"1":0.307,"2":0.113},"massQuantiles":{"p10":50.0,"median":10899.0,"p90":231624.00000002404},"concentration":{"0.5":8881,"0.8":32560,"0.9":52840,"0.99":112983},"lowMass":{"10":11320,"100":27558,"1000":57275,"10000":107278},"rootVisits":6355772.00000622}};
+
+const ACOL = {
+  Income:"#55657b", ForeignAid:"#e8b84b", Tax:"#8b5cf6", Steal:"#0ea5e9",
+  Exchange:"#10b981", Assassinate:"#cfd8e3", Coup:"#e04a4a"
+};
+const ORDER = ["Income","ForeignAid","Tax","Steal","Exchange","Assassinate","Coup"];
+const LBL = {ForeignAid:"Foreign Aid"};
+const pct  = v => (v*100).toFixed(1)+"%";
+const pct0 = v => Math.round(v*100)+"%";
+const num  = v => v.toLocaleString("en-US");
+const compact = v => v>=1e9 ? (v/1e9).toFixed(1)+"B" : v>=1e6 ? (v/1e6).toFixed(1)+"M"
+                   : v>=1e3 ? (v/1e3).toFixed(0)+"k" : Math.round(v);
+/* Heat colour for a 0..1 frequency: dim slate -> gold. */
+function heat(v){
+  const a = Math.min(1, Math.pow(v,0.65));
+  return `background:rgba(232,184,75,${(a*0.42).toFixed(3)});color:${v>0.02?"#f0e2c0":"#5d6b7d"}`;
+}
+function bar(v,cls){
+  return `<div class="barcell"><b>${pct(v)}</b><span class="mini ${cls||""}"><i style="width:${Math.min(100,v*100)}%"></i></span></div>`;
+}
+function head(cells){ return "<thead><tr>"+cells+"</tr></thead>"; }
+
+function renderCFR(){
+  const M = CFR.meta, D = CFR.diag;
+
+  /* ---------- KPI strip ---------- */
+  $("#solKpis").innerHTML = [
+    [num(M.infosets), "Information sets", "Every distinct thing a player can know when it is their decision."],
+    [compact(M.totalMass), "Reach-weighted visits", "Summed strategy mass across the run — the traffic behind the averages."],
+    [compact(D.rootVisits), "Visits, busiest opening", "The most-played starting hand node. Sampling is uneven, so rare nodes are thin."],
+    ["3", "Decision phases", "Act · respond to an action · respond to a block."]
+  ].map(([k,l,s])=>`<div class="kpi"><div class="k">${k}</div><div class="l">${l}</div><div class="s">${s}</div></div>`).join("");
+
+  /* ---------- phases ---------- */
+  const PH = [["0","Take an action","Choose a move on your own turn"],
+              ["1","Respond to an action","Pass, challenge, or block a claim"],
+              ["2","Respond to a block","Accept the block or challenge it"]];
+  $("#solPhases").innerHTML = head(
+      "<th>Phase</th><th>Decision</th><th class='num'>Info sets</th><th class='num'>Share of nodes</th>"+
+      "<th>Share of play</th><th class='num'>Mean entropy</th>")
+    + "<tbody>" + PH.map(([p,name,desc])=>{
+      const n = M.byPhase[p], mass = M.massByPhase[p];
+      return `<tr><td><strong>${name}</strong><br><span style="color:var(--dim);font-size:11.5px">${desc}</span></td>
+        <td style="color:var(--dim)">phase ${p}</td>
+        <td class="num">${num(n)}</td>
+        <td class="num">${pct(n/M.infosets)}</td>
+        <td>${bar(mass/M.totalMass)}</td>
+        <td class="num">${D.entropy[p].toFixed(2)} bits</td></tr>`;
+    }).join("") + "</tbody>";
+
+  /* ---------- convergence KPIs ---------- */
+  $("#solConv").innerHTML = [
+    [pct(D.drift), "Policy drift",
+     "Reach-weighted distance between the current regret-matching policy and the running average. Small means the two agree — the solve has stopped moving where it matters."],
+    [pct(D.purity.pure/M.infosets), "Pure information sets",
+     "Nodes where one action takes more than 95% of the weight. Coup is a mixing game, so a large pure fraction is the tail resolving, not the core."],
+    [num(D.concentration["0.5"]), "Nodes holding half the play",
+     "4% of the tree carries 50% of equilibrium reach probability. Those nodes are well sampled; the rest are not."],
+    [pct(D.lowMass["100"]/M.infosets), "Nodes under 100 visits",
+     "The unconverged tail. It carries under 0.01% of reach mass, so it barely affects aggregates — but individual cells there are noise."]
+  ].map(([k,l,s])=>`<div class="kpi"><div class="k">${k}</div><div class="l">${l}</div><div class="s">${s}</div></div>`).join("");
+
+  const PU = [["pure","One action above 95%","Forced or effectively solved"],
+              ["lean","Leading action 70–95%","A clear preference with a small mix"],
+              ["mixed","Leading action 40–70%","Genuinely mixed — the interesting part"],
+              ["wide","Leading action under 40%","Near-indifferent, or under-sampled"]];
+  $("#solPurity").innerHTML = head("<th>Sharpness</th><th>Reading</th><th class='num'>Info sets</th><th>Share</th>")
+    + "<tbody>" + PU.map(([k,name,desc])=>
+      `<tr><td><strong>${name}</strong></td><td style="color:var(--dim)">${desc}</td>
+       <td class="num">${num(D.purity[k])}</td><td>${bar(D.purity[k]/M.infosets)}</td></tr>`).join("")
+    + "</tbody>";
+
+  const COV = [["50%",D.concentration["0.5"]],["80%",D.concentration["0.8"]],
+               ["90%",D.concentration["0.9"]],["99%",D.concentration["0.99"]]];
+  $("#solCoverage").innerHTML = head("<th>Share of equilibrium play</th><th class='num'>Info sets needed</th><th>Share of tree</th>")
+    + "<tbody>" + COV.map(([l,n])=>
+      `<tr><td>${l} of all reach probability</td><td class="num">${num(n)}</td><td>${bar(n/M.infosets)}</td></tr>`).join("")
+    + `<tr class="hi"><td>Median node</td><td class="num">${num(Math.round(D.massQuantiles.median))} visits</td>
+        <td style="color:var(--dim)">10th percentile ${num(Math.round(D.massQuantiles.p10))} · 90th ${compact(D.massQuantiles.p90)}</td></tr></tbody>`;
+
+  /* ---------- turn policy by coins ---------- */
+  $("#solLegend").innerHTML = ORDER.map(a=>
+    `<span><i style="background:${ACOL[a]}"></i>${LBL[a]||a}</span>`).join("");
+  let rows="";
+  for(let c=0;c<=12;c++){
+    const p = CFR.turnByCoins[c]; if(!p) continue;
+    const seg = ORDER.filter(a=>p[a]!==undefined)
+      .map(a=>`<i style="width:${(p[a]*100).toFixed(2)}%;background:${ACOL[a]}" title="${LBL[a]||a} ${pct(p[a])}"></i>`).join("");
+    const top = ORDER.filter(a=>p[a]!==undefined).sort((x,y)=>p[y]-p[x])[0];
+    const note = c===3?"Assassinate becomes legal":c===7?"Coup becomes legal":c===10?"Coup is forced":"";
+    rows += `<tr${note?' class="hi"':''}><td class="num"><strong>${c}</strong></td>
+      <td style="width:56%"><div class="stack">${seg}</div></td>
+      <td><span style="color:${ACOL[top]};font-weight:700">${LBL[top]||top}</span>
+          <span style="color:var(--dim)"> ${pct(p[top])}</span></td>
+      <td style="color:var(--dim);font-size:11.5px">${note}</td></tr>`;
+  }
+  $("#solTurn").innerHTML = head("<th class='num'>Coins</th><th>Mix</th><th>Most frequent</th><th></th>")+"<tbody>"+rows+"</tbody>";
+
+  /* ---------- opening chart ---------- */
+  const R = CFR.root;
+  $("#solRoot").innerHTML = head("<th>Starting hand</th>"+R.acts.map(a=>`<th class="num">${LBL[a]||a}</th>`).join("")+"<th class='num'>Visits</th>")
+    + "<tbody>" + R.rows.map(r=>
+      `<tr><td><strong>${r.hand[0]}</strong> + <strong>${r.hand[1]}</strong></td>`
+      + r.p.map(v=>`<td class="heat" style="${heat(v)}">${pct0(v)}</td>`).join("")
+      + `<td class="num" style="color:var(--dim)">${compact(r.w)}</td></tr>`).join("") + "</tbody>";
+
+  /* ---------- responses ---------- */
+  const RESP=[["ForeignAid","Foreign Aid"],["Tax","Tax"],["Steal","Steal"],["Exchange","Exchange"],["Assassinate","Assassinate"]];
+  const COLS=["Pass","Challenge","BlockFA(Duke)","Block(Contessa)","Block(Captain)","Block(Ambassador)"];
+  const CH  ={Pass:"Pass",Challenge:"Challenge","BlockFA(Duke)":"Block (Duke)","Block(Contessa)":"Block (Contessa)",
+              "Block(Captain)":"Block (Captain)","Block(Ambassador)":"Block (Ambassador)"};
+  $("#solResp").innerHTML = head("<th>Claim faced</th>"+COLS.map(c=>`<th class="num">${CH[c]}</th>`).join(""))
+    + "<tbody>" + RESP.map(([k,name])=>{
+      const p=CFR.resp[k];
+      return `<tr><td><strong>${name}</strong></td>`+COLS.map(c=>
+        p[c]===undefined ? `<td class="heat" style="color:#3b4757">·</td>`
+                         : `<td class="heat" style="${heat(p[c])}">${pct0(p[c])}</td>`).join("")+"</tr>";
+    }).join("") + "</tbody>";
+
+  /* ---------- challenge vs copies seen ---------- */
+  function copiesTable(sel, src, label){
+    const keys=Object.keys(src);
+    $(sel).innerHTML = head(`<th>${label}</th>`+[0,1,2,3].map(n=>`<th class="num">${n} seen</th>`).join("")+"<th>Swing</th>")
+      + "<tbody>" + keys.map(k=>{
+        const row=src[k];
+        return `<tr><td><strong>${k}</strong></td>`+[0,1,2,3].map(n=>{
+          const c=row[n]; return c ? `<td class="heat" style="${heat(c.chal)}">${pct0(c.chal)}<br><span style="font-size:9.5px;color:#8497aa;font-weight:500">${compact(c.w)}</span></td>`
+                                   : `<td class="heat">·</td>`;
+        }).join("")+`<td style="color:var(--dim);font-size:11.5px">×${(row[3].chal/row[0].chal).toFixed(1)} from 0 to 3</td></tr>`;
+      }).join("") + "</tbody>";
+  }
+  copiesTable("#solCopies", CFR.blockerChal, "Claim faced");
+
+  /* ---------- claim bluff rates ---------- */
+  $("#solClaim").innerHTML = head("<th>Claim</th><th>Card</th><th>Frequency with the card</th><th>Frequency without it</th><th>Share of claims that are honest</th><th class='num'>Challenged</th>")
+    + "<tbody>" + Object.entries(CFR.claim).map(([k,v])=>
+      `<tr><td><strong>${LBL[k]||k}</strong></td><td style="color:var(--dim)">${v.card}</td>
+       <td>${bar(v.with_card,"g")}</td><td>${bar(v.without,"r")}</td><td>${bar(v.honest)}</td>
+       <td class="num">${pct(v.challenged)}</td></tr>`).join("") + "</tbody>";
+
+  /* ---------- block bluff rates ---------- */
+  $("#solBlock").innerHTML = head("<th>Block</th><th>With the card</th><th>Without it</th><th>Share of blocks that are honest</th><th class='num'>Challenged</th>")
+    + "<tbody>" + Object.entries(CFR.blockRates).map(([k,v])=>
+      `<tr><td><strong>${k}</strong></td><td>${bar(v.with_card,"g")}</td><td>${bar(v.without,"r")}</td>
+       <td>${bar(v.honest)}</td><td class="num">${pct(v.challenged)}</td></tr>`).join("") + "</tbody>";
+
+  /* ---------- challenge matrix (both tabs) ---------- */
+  function matrix(sel){
+    const cell=(me,opp,note)=>{
+      const v=CFR.chalMatrix[me+"|"+opp].chal;
+      return `<div class="mc"><b style="color:${v>0.2?"#f5d283":v>0.07?"#c6d3e2":"#7f8ea3"}">${pct(v)}</b><span>${note}</span></div>`;
+    };
+    $(sel).innerHTML =
+      `<div class="mh"></div><div class="mh">They hold 2</div><div class="mh">They hold 1</div>
+       <div class="mh">You&nbsp;hold&nbsp;2</div>${cell(2,2,"even game")}${cell(2,1,"a win ends it")}
+       <div class="mh">You&nbsp;hold&nbsp;1</div>${cell(1,2,"a loss ends it")}${cell(1,1,"sudden death")}`;
+  }
+  matrix("#solMatrix"); matrix("#gtoMatrix");
+
+  /* ---------- facing an assassination ---------- */
+  const AD=[["1|1","Last influence","Holding a Contessa"],["1|0","Last influence","No Contessa"],
+            ["2|1","Two influences","Holding a Contessa"],["2|0","Two influences","No Contessa"]];
+  $("#solAssassin").innerHTML = head("<th>Your position</th><th>Your hand</th><th class='num'>Pass</th><th class='num'>Challenge</th><th class='num'>Block (Contessa)</th><th>Reading</th>")
+    + "<tbody>" + AD.map(([k,a,b])=>{
+      const p=CFR.assassinDef[k].p;
+      const note = k==="1|0" ? "Never folds — splits between a bluff-block and a call"
+                 : k==="1|1" ? "Automatic"
+                 : k==="2|1" ? "Blocks, but sometimes takes the hit to stay unreadable"
+                 : "Folds and keeps the Contessa claim in reserve";
+      return `<tr><td><strong>${a}</strong></td><td style="color:var(--dim)">${b}</td>`
+        + ["Pass","Challenge","Block(Contessa)"].map(c=>`<td class="heat" style="${heat(p[c])}">${pct(p[c])}</td>`).join("")
+        + `<td style="color:var(--dim);font-size:11.5px">${note}</td></tr>`;
+    }).join("") + "</tbody>";
+
+  /* ---------- the seven coin line ---------- */
+  let cr="";
+  for(let c=0;c<=9;c++){
+    const hi = c>=7;
+    cr += `<tr${hi?' class="hi"':''}><td class="num"><strong>${c}</strong></td>
+      <td>${bar(CFR.faByCoins[c])}</td><td>${bar(CFR.stealByCoins[c],"g")}</td>
+      <td style="color:var(--dim);font-size:11.5px">${c===7?"coup becomes affordable":""}</td></tr>`;
+  }
+  $("#solCoins").innerHTML = head("<th class='num'>Their coins</th><th>Foreign Aid gets blocked</th><th>A Captain-holder steals</th><th></th>")+"<tbody>"+cr+"</tbody>";
+
+  /* ---------- coup vs assassinate ---------- */
+  let kr="";
+  [7,8,9].forEach(c=>{
+    [["1","Holding an Assassin"],["0","No Assassin"]].forEach(([h,lab])=>{
+      const p=CFR.coupVsAss[c+"|"+h];
+      kr += `<tr><td class="num"><strong>${c}</strong></td><td>${lab}</td>
+        <td class="heat" style="${heat(p.Coup)}">${pct(p.Coup)}</td>
+        <td class="heat" style="${heat(p.Assassinate)}">${pct(p.Assassinate)}</td>
+        <td class="heat" style="${heat(p.Income)}">${pct(p.Income)}</td></tr>`;
+    });
+  });
+  $("#solCoup").innerHTML = head("<th class='num'>Coins</th><th>Hand</th><th class='num'>Coup</th><th class='num'>Assassinate</th><th class='num'>Income</th>")+"<tbody>"+kr+"</tbody>";
+
+  /* ---------- GTO tab: copies-seen strip ---------- */
+  copiesTable("#gtoCopies", CFR.blockerChal, "Claim faced");
+}
+
 buildRoleGrid();
+renderCFR();
 buildSetupUI();
 $("#setupModal").classList.add("on");
 setPrompt("Welcome", "Choose your table size to begin.");
