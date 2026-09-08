@@ -35,7 +35,8 @@ PHASES = {"action": PHASE_ACTION, "respond": PHASE_RESPOND,
 
 def factory_from(tag):
     return functools.partial(new_game, tag.get("max_turns", 60),
-                             tag.get("peek_memory", 1))
+                             tag.get("peek_memory", 1),
+                             tag.get("claim_memory", 1))
 
 
 def cmd_verify(a):
@@ -55,16 +56,21 @@ def cmd_verify(a):
 
 
 def cmd_solve(a):
-    tag = {"max_turns": a.max_turns, "peek_memory": a.peek_memory}
+    tag = {"max_turns": a.max_turns, "peek_memory": a.peek_memory,
+           "claim_memory": a.claim_memory}
     if a.resume and os.path.exists(a.out):
         s = Solver.load(a.out)
         s.game_factory = factory_from(s.tag)
         print(f"resuming {a.out} at t={s.t:,} ({len(s.nodes):,} infosets)")
     else:
         s = Solver(factory_from(tag), seed=a.seed, tag=tag)
-        print(f"new solve: max_turns={a.max_turns} peek_memory={a.peek_memory}")
+        print(f"new solve: max_turns={a.max_turns} peek_memory={a.peek_memory} "
+              f"claim_memory={a.claim_memory}")
         print("peek_memory=1 keeps the cards you hand back in an Exchange, which "
-              "is what makes card-removal reasoning possible.\n")
+              "is what makes card-removal reasoning possible.")
+        print("claim_memory=1 keeps which roles each side has claimed since their "
+              "hand last changed, which is what makes bluff-consistency "
+              "reasoning possible.\n")
 
     gf = s.game_factory
     exploit_fn = None
@@ -114,12 +120,16 @@ def cmd_query(a):
         s.average_strategy(), my_lives=a.my_lives, opp_lives=a.opp_lives,
         my_coins=a.my_coins, opp_coins=a.opp_coins,
         my_hand=E.parse_cards(a.hand), revealed=E.parse_cards(a.face_up),
-        peek=E.parse_cards(a.peek), phase=PHASES[a.phase],
+        peek=E.parse_cards(a.peek),
+        my_claims=E.claim_mask(a.my_claims), opp_claims=E.claim_mask(a.opp_claims),
+        phase=PHASES[a.phase],
         pend=E.ACTION_ID[a.vs.lower()] if a.vs else None,
         pool=E.parse_cards(a.pool) if a.pool else None)
     print(f"you {a.my_lives} inf / {a.my_coins}c ({a.hand})   "
           f"opp {a.opp_lives} inf / {a.opp_coins}c"
-          + (f"   face-up: {a.face_up}" if a.face_up else ""))
+          + (f"   face-up: {a.face_up}" if a.face_up else "")
+          + (f"   you claimed: {a.my_claims}" if a.my_claims else "")
+          + (f"   opp claimed: {a.opp_claims}" if a.opp_claims else ""))
     if rows is None:
         print("\nthat situation never came up in training -- no reliable answer")
         return
@@ -152,6 +162,9 @@ def main():
     p.add_argument("--peek-memory", type=int, default=1,
                    help="1 = remember the cards you handed back in an Exchange "
                         "(card removal); 0 = the old solve's information")
+    p.add_argument("--claim-memory", type=int, default=1,
+                   help="1 = remember which roles each side claimed since their "
+                        "hand last changed (bluff consistency); 0 = forget")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--report-every", type=int, default=50000)
     p.add_argument("--checkpoint-every", type=int, default=250000)
@@ -179,6 +192,10 @@ def main():
     p.add_argument("--hand", default="duke,captain")
     p.add_argument("--face-up", default="")
     p.add_argument("--peek", default="", help="cards you handed back in an Exchange")
+    p.add_argument("--my-claims", default="",
+                   help="roles you have claimed since your hand last changed")
+    p.add_argument("--opp-claims", default="",
+                   help="roles the opponent has claimed since their hand last changed")
     p.add_argument("--phase", default="action", choices=list(PHASES))
     p.add_argument("--vs", default="", help="the action you are responding to")
     p.add_argument("--pool", default="", help="your 4-card pool for exchange-keep")

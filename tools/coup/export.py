@@ -6,7 +6,7 @@ import csv
 
 from .game import (CARD_NAMES, ACTION_NAMES, RESPONSE_NAMES, BLOCK_RESPONSE_NAMES,
                    PHASE_ACTION, PHASE_RESPOND, PHASE_BLOCK_RESP,
-                   PHASE_DISCARD, PHASE_EXCHANGE)
+                   PHASE_DISCARD, PHASE_EXCHANGE, claim_cards)
 
 CARD_ID = {n.lower(): i for i, n in enumerate(CARD_NAMES)}
 ACTION_ID = {n.lower(): i for i, n in enumerate(ACTION_NAMES)}
@@ -21,6 +21,20 @@ def parse_cards(text):
         return ()
     parts = [p.strip().lower() for p in text.replace("+", ",").split(",") if p.strip()]
     return tuple(sorted(CARD_ID[p] for p in parts))
+
+
+def claim_mask(cards):
+    """(0, 2) -> bitmask. Accepts the same text form as parse_cards."""
+    if isinstance(cards, str):
+        cards = parse_cards(cards)
+    m = 0
+    for c in cards:
+        m |= 1 << c
+    return m
+
+
+def claim_text(mask):
+    return "+".join(CARD_NAMES[c] for c in claim_cards(mask))
 
 
 def action_label(phase, action):
@@ -38,12 +52,13 @@ def action_label(phase, action):
 
 
 def make_key(my_lives, opp_lives, my_coins, opp_coins, my_hand,
-             revealed=(), peek=(), phase=PHASE_ACTION, pend=None, blk=None,
-             pool=None):
+             revealed=(), peek=(), my_claims=0, opp_claims=0,
+             phase=PHASE_ACTION, pend=None, blk=None, pool=None):
     """Build the infoset key exactly as the engine does."""
     tail = tuple(sorted(pool)) if phase == PHASE_EXCHANGE else tuple(sorted(my_hand))
     return (my_lives, opp_lives, my_coins, opp_coins,
             tuple(sorted(revealed)), tuple(sorted(peek)),
+            my_claims, opp_claims,
             phase, pend, blk, tail)
 
 
@@ -54,7 +69,7 @@ def lookup(policy, **kw):
     if e is None:
         return None
     actions, probs = e
-    phase = key[6]
+    phase = key[8]
     rows = [(action_label(phase, a), p) for a, p in zip(actions, probs)]
     rows.sort(key=lambda r: -r[1])
     return rows
@@ -66,10 +81,10 @@ def export_csv(policy, path, phase=None, min_prob=0.0):
     with open(path, "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["my_lives", "opp_lives", "my_coins", "opp_coins", "my_hand",
-                    "face_up", "peek", "phase", "vs_action", "vs_block",
-                    "choice", "frequency"])
+                    "face_up", "peek", "my_claims", "opp_claims",
+                    "phase", "vs_action", "vs_block", "choice", "frequency"])
         for key, (actions, probs) in policy.items():
-            (ml, ol, mc, oc, rev, peek, ph, pend, blk, tail) = key
+            (ml, ol, mc, oc, rev, peek, mcl, ocl, ph, pend, blk, tail) = key
             if phase is not None and ph != phase:
                 continue
             for a, p in zip(actions, probs):
@@ -80,6 +95,7 @@ def export_csv(policy, path, phase=None, min_prob=0.0):
                     "+".join(CARD_NAMES[c] for c in tail),
                     "+".join(CARD_NAMES[c] for c in rev),
                     "+".join(CARD_NAMES[c] for c in peek),
+                    claim_text(mcl), claim_text(ocl),
                     PHASE_NAMES.get(ph, ph),
                     ACTION_NAMES[pend] if pend is not None else "",
                     RESPONSE_NAMES[blk] if blk is not None else "",

@@ -10,6 +10,10 @@ and the information the previous solve discarded:
 
   * the cards you saw during an Exchange and handed back to the deck (`peek`),
     which is what makes card-removal reasoning possible.
+  * which roles each player has *claimed* since their hand last changed
+    (`claims`), which is what makes bluff-consistency reasoning possible: two
+    influences can back at most two distinct claims, so a third one is a proven
+    lie. Claims are public, so both players see both masks.
 
 Deck is tracked as a multiset of counts, never as a shuffled list, so a draw is
 an explicit chance node with exact probabilities rather than a sampled ordering.
@@ -47,6 +51,11 @@ RESPONSE_NAMES = {
 }
 BLOCK_CARD = {BLOCK_DUKE: DUKE, BLOCK_CONTESSA: CONTESSA,
               BLOCK_CAPTAIN: CAPTAIN, BLOCK_AMBASSADOR: AMBASSADOR}
+
+
+def claim_cards(mask):
+    """Bitmask of claimed roles -> tuple of card ids."""
+    return tuple(c for c in range(N_CARDS) if mask >> c & 1)
 
 RESPONSES = {
     FOREIGN_AID:  (PASS, BLOCK_DUKE),
@@ -91,14 +100,15 @@ class State:
 
     __slots__ = ("hands", "coins", "revealed", "deck", "peek", "to_move",
                  "phase", "pend", "blk", "pool", "stack", "turn", "max_turns",
-                 "chance", "peek_memory")
+                 "chance", "peek_memory", "claims", "claim_memory")
 
-    def __init__(self, max_turns=60, peek_memory=1):
+    def __init__(self, max_turns=60, peek_memory=1, claim_memory=1):
         self.hands = [(), ()]
         self.coins = [2, 2]
         self.revealed = ()
         self.deck = (COPIES,) * N_CARDS
         self.peek = [(), ()]          # cards this player handed back to the deck
+        self.claims = [0, 0]          # roles each player has claimed, as a bitmask
         self.to_move = 0
         self.phase = PHASE_CHANCE
         self.chance = (DEAL, 0)       # (kind, arg)
@@ -109,17 +119,20 @@ class State:
         self.turn = 0
         self.max_turns = max_turns
         self.peek_memory = peek_memory
+        self.claim_memory = claim_memory
 
     # ------------------------------------------------------------ basics --
     def clone(self):
         s = State.__new__(State)
         s.hands = list(self.hands); s.coins = list(self.coins)
         s.revealed = self.revealed; s.deck = self.deck
-        s.peek = list(self.peek); s.to_move = self.to_move
+        s.peek = list(self.peek); s.claims = list(self.claims)
+        s.to_move = self.to_move
         s.phase = self.phase; s.chance = self.chance
         s.pend = self.pend; s.blk = self.blk; s.pool = self.pool
         s.stack = self.stack; s.turn = self.turn
         s.max_turns = self.max_turns; s.peek_memory = self.peek_memory
+        s.claim_memory = self.claim_memory
         return s
 
     def is_terminal(self):
@@ -190,6 +203,7 @@ class State:
         base = (len(me_h), len(self.hands[opp]),
                 self.coins[player], self.coins[opp],
                 self.revealed, self.peek[player],
+                self.claims[player], self.claims[opp],
                 self.phase, self.pend, self.blk)
         if self.phase == PHASE_EXCHANGE:
             return base + (tuple(sorted(self.pool)),)
@@ -273,6 +287,8 @@ class State:
             return
         if a == ASSASSINATE:
             self.coins[me] -= ASSASSIN_COST      # paid on declaration, never refunded
+        if self.claim_memory and a in CLAIMS:   # Foreign Aid claims nothing
+            self.claims[me] |= 1 << CLAIMS[a]
         self.pend = a
         self.stack = (("end",),)
         self.phase = PHASE_RESPOND
@@ -297,6 +313,8 @@ class State:
                 self.stack = self.stack + (("lose", actor),)
             return
         # a block was claimed; the actor decides whether to challenge it
+        if self.claim_memory:
+            self.claims[responder] |= 1 << BLOCK_CARD[r]
         self.blk = r
         self.phase = PHASE_BLOCK_RESP
         self.to_move = actor
@@ -336,6 +354,8 @@ class State:
         # this is the card-removal information the old solve threw away
         if self.peek_memory:
             self.peek[p] = returned
+        if self.claim_memory:
+            self.claims[p] = 0        # both cards may have changed; nothing binds
         self.pool = None
         self.phase = None
 
@@ -376,6 +396,10 @@ class State:
                 p, card = op[1], op[2]
                 if card not in self.hands[p] or not sum(self.deck):
                     continue
+                if self.claim_memory:
+                    # that card went back to the deck, so the claim proves nothing
+                    # about the hand from here on; other claims still bind
+                    self.claims[p] &= ~(1 << card)
                 self._return(p, card)
                 self.phase = PHASE_CHANCE
                 self.chance = (REDRAW, p)
@@ -410,9 +434,9 @@ class State:
                 self.chance = (EXDRAW, actor)
 
 
-def new_game(max_turns=60, peek_memory=1):
-    s = State(max_turns=max_turns, peek_memory=peek_memory)
-    return s
+def new_game(max_turns=60, peek_memory=1, claim_memory=1):
+    return State(max_turns=max_turns, peek_memory=peek_memory,
+                 claim_memory=claim_memory)
 
 
 def describe(state, player):
@@ -420,5 +444,8 @@ def describe(state, player):
     opp = 1 - player
     hand = "+".join(CARD_NAMES[c] for c in state.hands[player]) or "-"
     rev = "+".join(CARD_NAMES[c] for c in state.revealed) or "none"
+    def claimed(p):
+        return "+".join(CARD_NAMES[c] for c in claim_cards(state.claims[p])) or "none"
     return (f"you {len(state.hands[player])} inf / {state.coins[player]}c ({hand})   "
-            f"opp {len(state.hands[opp])} inf / {state.coins[opp]}c   face-up: {rev}")
+            f"opp {len(state.hands[opp])} inf / {state.coins[opp]}c   face-up: {rev}   "
+            f"claimed: you {claimed(player)} / opp {claimed(opp)}")

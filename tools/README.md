@@ -41,7 +41,15 @@ Every decision is keyed on exactly what the player legitimately knows:
 | your hand | the cards you hold |
 | face-up cards | everything already revealed |
 | **cards you handed back in an Exchange** | **new** -- this is the card-removal information |
+| **roles each side has claimed** | **new** -- this is the bluff-consistency information |
 | what you are responding to | pending action, pending block |
+
+Claims are public, so both masks appear in both players' keys. A claim expires
+when the hand behind it can have changed: an Exchange clears that player's whole
+mask, and winning a challenge clears only the bit for the card that was shuffled
+back. Under random play 21% of live states already have a player claiming more
+distinct roles than they hold influences -- a proven lie the old solve could not
+see.
 
 ## What is new versus the old solve
 
@@ -56,6 +64,11 @@ were missing, and they are the reason for a rebuild rather than a longer run:
    calibration against the old file rejected any strategic rule for it.
 3. **Peek memory.** The cards you saw during an Exchange and returned to the
    deck. Run with `--peek-memory 0` to reproduce the old information set.
+4. **Claim memory.** Which roles each side has claimed since their hand last
+   changed. Without it the solver re-meets an opponent who has claimed Duke,
+   Captain and Assassin on two influences as if they had claimed nothing, so it
+   cannot punish a bluffing line and cannot price the cost of its own. Run with
+   `--claim-memory 0` to turn it off.
 
 ## Why it converges when the old one did not
 
@@ -121,6 +134,18 @@ hours, not minutes. That is the real cost of wanting every decision point
 solved, and it is why the stopping rule has to be NashConv and not patience.
 
 Two ways to make that tractable:
+
+- **Turn the memories on one at a time.** Each one multiplies the tree. Measured
+  at a fixed 60,000 iterations:
+
+  | peek | claim | infosets found | it/s |
+  |---|---|---|---|
+  | 0 | 0 | 140,130 | 3,916 |
+  | 1 | 0 | 309,678 | 3,802 |
+  | 0 | 1 | 491,281 | 3,010 |
+  | 1 | 1 | 610,722 | 3,233 |
+
+  Claim memory is the more expensive of the two and also the more valuable.
 
 - **Start with `--peek-memory 0`.** That drops peek memory and shrinks the tree
   to roughly the old solve's size, so it converges far sooner. Get that one
