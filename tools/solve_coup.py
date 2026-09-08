@@ -81,7 +81,7 @@ def cmd_solve(a):
 
     s.run(a.iters, report_every=a.report_every, checkpoint=a.out,
           checkpoint_every=a.checkpoint_every, exploit_every=a.exploit_every,
-          exploit_fn=exploit_fn)
+          exploit_fn=exploit_fn, max_gb=a.max_gb)
     print(f"\nsaved {a.out}: t={s.t:,}, {len(s.nodes):,} infosets")
 
 
@@ -166,6 +166,9 @@ def main():
                    help="1 = remember which roles each side claimed since their "
                         "hand last changed (bluff consistency); 0 = forget")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--max-gb", type=float, default=0.0,
+                   help="stop and checkpoint if resident memory passes this, "
+                        "instead of being OOM-killed. 0 = no limit")
     p.add_argument("--report-every", type=int, default=50000)
     p.add_argument("--checkpoint-every", type=int, default=250000)
     p.add_argument("--exploit-every", type=int, default=500000)

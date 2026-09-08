@@ -9,6 +9,45 @@ not caught up.
 
 ## Quick start
 
+One command runs the whole plan, smallest tree first, and survives logout:
+
+```bash
+tools/run.sh start      # launch everything detached
+tools/run.sh status     # where each stage is, and whether it has flattened
+tools/run.sh stop       # halt; checkpoints are kept, `start` resumes
+```
+
+It runs three stages into `solves/`, each one a superset of the last. All
+figures below are measured on one core of CPython 3.11, not guessed:
+
+| stage | peek | claim | tree | ceiling | wall time | RAM | avg visits/infoset |
+|---|---|---|---|---|---|---|---|
+| `base` | 0 | 0 | ~380k, saturated | 20M iters | ~1.3 h | 0.2 GB | ~1,400 |
+| `claims` | 0 | 1 | ~6M | 60M iters | ~5.5 h | 2.6 GB | ~270 |
+| `full` | 1 | 1 | 15-30M, still growing | 150M iters | ~13 h | 7-13 GB | ~200 |
+
+About 20 hours end to end. Each traversal touches 27 infosets, so iterations
+buy visits at 27:1 -- but visits are reach-weighted, so a rare infoset gets far
+fewer than the average and a common one far more.
+
+**Only `base` will finish properly.** Its tree stops growing before 2M
+iterations, so 20M iterations genuinely converge it. `claims` and `full` are
+still discovering new infosets when the budget runs out; their NashConv will
+still be falling. That is a real answer -- just an unfinished one, and `status`
+will say so rather than pretending otherwise.
+
+The iteration counts are a ceiling, not a target. **Stop a stage when its
+NashConv stops falling**, not when it hits the number -- that is what `status`
+reports. Every stage checkpoints and resumes, so interrupting costs nothing.
+
+For a quick trial before committing hours:
+
+```bash
+COUP_STAGES="trial 0 0 200000" tools/run.sh start
+```
+
+Or drive the pieces yourself:
+
 ```bash
 # 1. prove the solver is correct on a game with a known analytic answer
 python3 tools/solve_coup.py verify
@@ -146,6 +185,15 @@ Two ways to make that tractable:
   | 1 | 1 | 610,722 | 3,233 |
 
   Claim memory is the more expensive of the two and also the more valuable.
+
+- **Memory is the binding constraint, not time.** An infoset costs 443 bytes:
+  the key is packed into a single int, regrets and strategy sums are `array('d')`
+  rather than lists of boxed floats, and identical legal-action tuples are
+  shared. That is down from 780 bytes and about 10% faster, because the two
+  parallel dicts became one. At `full` scale it is still the difference between
+  9 GB and 16 GB. Pass `--max-gb` (`run.sh` sets it to two thirds of RAM) and a
+  solve that reaches the limit checkpoints and stops cleanly instead of being
+  OOM-killed hours in.
 
 - **Start with `--peek-memory 0`.** That drops peek memory and shrinks the tree
   to roughly the old solve's size, so it converges far sooner. Get that one

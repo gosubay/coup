@@ -24,6 +24,7 @@ from __future__ import annotations
 import pickle
 import random
 import time
+from array import array
 
 
 class Solver:
@@ -35,8 +36,11 @@ class Solver:
         # response -- which is how exploitability gets measured.
         self.frozen = frozen
         self.frozen_player = frozen_player
-        self.nodes: dict = {}          # key -> [regrets, strategy_sum]
-        self.actions: dict = {}        # key -> legal action tuple
+        # one dict, not two: a second dict keyed on the same infosets costs
+        # another ~100 bytes each, and there are tens of millions of them
+        self.nodes: dict = {}          # key -> [regrets, strategy_sum, legal]
+        # every infoset with the same legal actions shares one tuple
+        self._legal: dict = {}
         self.rng = random.Random(seed)
         self.epsilon = epsilon         # exploration in the sampling policy
         self.t = 0
@@ -48,9 +52,11 @@ class Solver:
         n = self.nodes.get(key)
         if n is None:
             k = len(legal)
-            n = [[0.0] * k, [0.0] * k]
+            # array('d') rather than a list: a list of k floats is k boxed float
+            # objects, which at this scale is most of the memory in the process
+            n = [array("d", bytes(8 * k)), array("d", bytes(8 * k)),
+                 self._legal.setdefault(legal, legal)]
             self.nodes[key] = n
-            self.actions[key] = legal
         return n
 
     @staticmethod
@@ -99,7 +105,7 @@ class Solver:
             sigma = e[1] if e is not None else [1.0 / k] * k
             regrets = strat = None
         else:
-            regrets, strat = self._node(key, legal)
+            regrets, strat, _ = self._node(key, legal)
             sigma = self._strategy(regrets)
 
         if p == i:
@@ -129,8 +135,20 @@ class Solver:
         return u, tail * sigma[a]
 
     # -------------------------------------------------------------- drive --
+    @staticmethod
+    def _rss_gb():
+        """Resident memory, or 0.0 where /proc is not available."""
+        try:
+            with open("/proc/self/status") as f:
+                for line in f:
+                    if line.startswith("VmRSS:"):
+                        return int(line.split()[1]) / 1048576.0
+        except OSError:
+            pass
+        return 0.0
+
     def run(self, iterations, report_every=0, checkpoint=None, checkpoint_every=0,
-            exploit_every=0, exploit_fn=None):
+            exploit_every=0, exploit_fn=None, max_gb=0.0):
         start = time.time()
         for _ in range(iterations):
             self.t += 1
@@ -151,29 +169,38 @@ class Solver:
 
             if checkpoint and checkpoint_every and self.t % checkpoint_every == 0:
                 self.save(checkpoint)
+                # stop on our own terms rather than being OOM-killed, which
+                # would lose everything since the last checkpoint
+                if max_gb and self._rss_gb() > max_gb:
+                    print(f"  stopping at t={self.t:,}: {self._rss_gb():.1f} GB "
+                          f"resident, over the {max_gb:.1f} GB budget. "
+                          f"Checkpoint saved. Solve a smaller configuration, or "
+                          f"raise --max-gb if the machine has the memory.",
+                          flush=True)
+                    break
         if checkpoint:
             self.save(checkpoint)
 
     # ----------------------------------------------------------- policies --
     def average_strategy(self):
         out = {}
-        for key, (_, strat) in self.nodes.items():
+        for key, (_, strat, legal) in self.nodes.items():
             tot = sum(strat)
             k = len(strat)
-            out[key] = (self.actions[key],
+            out[key] = (legal,
                         [s / tot for s in strat] if tot > 0 else [1.0 / k] * k)
         return out
 
     def current_strategy(self):
         """Diagnostic only. This one never settles -- that is normal."""
-        return {key: (self.actions[key], self._strategy(r))
-                for key, (r, _) in self.nodes.items()}
+        return {key: (legal, self._strategy(r))
+                for key, (r, _, legal) in self.nodes.items()}
 
     # --------------------------------------------------------------- i/o --
     def save(self, path):
         with open(path, "wb") as f:
-            pickle.dump({"version": 3, "iterations": self.t, "trace": self.trace,
-                         "actions": self.actions, "nodes": self.nodes,
+            pickle.dump({"version": 4, "iterations": self.t, "trace": self.trace,
+                         "nodes": self.nodes,
                          "tag": self.tag, "epsilon": self.epsilon},
                         f, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -182,8 +209,11 @@ class Solver:
         with open(path, "rb") as f:
             d = pickle.load(f)
         s = cls(game_factory, epsilon=d.get("epsilon", 0.6), tag=d.get("tag", {}))
+        if d.get("version", 0) < 4:
+            raise SystemExit(f"{path} was written by an older, incompatible "
+                             "format. Delete it and solve again.")
         s.t = d["iterations"]; s.trace = d["trace"]
-        s.actions = d["actions"]; s.nodes = d["nodes"]
+        s.nodes = d["nodes"]
         return s
 
 

@@ -57,6 +57,68 @@ def claim_cards(mask):
     """Bitmask of claimed roles -> tuple of card ids."""
     return tuple(c for c in range(N_CARDS) if mask >> c & 1)
 
+
+# ------------------------------------------------------------ key packing ----
+# An information set is stored as a single int rather than a tuple of tuples.
+# The tuple form costs ~330 bytes per infoset and the full-memory tree runs to
+# tens of millions of them, which does not fit in RAM. The packed form is one
+# small int. Layout, low bits first:
+#
+#   0-1 my lives | 2-3 opp lives | 4-7 my coins | 8-11 opp coins
+#   12-21 face-up counts | 22-31 peek counts | 32-36 my claims
+#   37-41 opp claims | 42-44 phase | 45-48 pending action | 49-51 pending block
+#   52-61 hand (or exchange pool) counts
+_S_OPP_LIVES, _S_MY_COINS, _S_OPP_COINS = 2, 4, 8
+_S_REV, _S_PEEK, _S_MY_CLAIM, _S_OPP_CLAIM = 12, 22, 32, 37
+_S_PHASE, _S_PEND, _S_BLK, _S_HAND = 42, 45, 49, 52
+
+
+def pack_counts(cards):
+    """Multiset of card ids -> 10-bit packed counts (2 bits each, max 3 copies)."""
+    v = 0
+    for c in cards:
+        v += 1 << (c + c)
+    return v
+
+
+def unpack_counts(v):
+    """Inverse of pack_counts, as a sorted tuple of card ids."""
+    out = []
+    for c in range(N_CARDS):
+        out.extend([c] * (v >> (c + c) & 3))
+    return tuple(out)
+
+
+def pack_key(my_lives, opp_lives, my_coins, opp_coins, revealed, peek,
+             my_claims, opp_claims, phase, pend, blk, hand):
+    return (my_lives
+            | opp_lives << _S_OPP_LIVES
+            | my_coins << _S_MY_COINS
+            | opp_coins << _S_OPP_COINS
+            | pack_counts(revealed) << _S_REV
+            | pack_counts(peek) << _S_PEEK
+            | my_claims << _S_MY_CLAIM
+            | opp_claims << _S_OPP_CLAIM
+            | phase << _S_PHASE
+            | (0 if pend is None else pend + 1) << _S_PEND
+            | (0 if blk is None else blk + 1) << _S_BLK
+            | pack_counts(hand) << _S_HAND)
+
+
+def unpack_key(k):
+    """-> dict of the same fields. Used by the query and export tools."""
+    pend = k >> _S_PEND & 15
+    blk = k >> _S_BLK & 7
+    return {"my_lives": k & 3, "opp_lives": k >> _S_OPP_LIVES & 3,
+            "my_coins": k >> _S_MY_COINS & 15, "opp_coins": k >> _S_OPP_COINS & 15,
+            "revealed": unpack_counts(k >> _S_REV & 1023),
+            "peek": unpack_counts(k >> _S_PEEK & 1023),
+            "my_claims": k >> _S_MY_CLAIM & 31, "opp_claims": k >> _S_OPP_CLAIM & 31,
+            "phase": k >> _S_PHASE & 7,
+            "pend": None if pend == 0 else pend - 1,
+            "blk": None if blk == 0 else blk - 1,
+            "hand": unpack_counts(k >> _S_HAND & 1023)}
+
 RESPONSES = {
     FOREIGN_AID:  (PASS, BLOCK_DUKE),
     TAX:          (PASS, CHALLENGE),
@@ -200,14 +262,13 @@ class State:
         """Everything `player` legitimately knows, and nothing else."""
         opp = 1 - player
         me_h = self.hands[player]
-        base = (len(me_h), len(self.hands[opp]),
-                self.coins[player], self.coins[opp],
-                self.revealed, self.peek[player],
-                self.claims[player], self.claims[opp],
-                self.phase, self.pend, self.blk)
-        if self.phase == PHASE_EXCHANGE:
-            return base + (tuple(sorted(self.pool)),)
-        return base + (me_h,)
+        return pack_key(
+            len(me_h), len(self.hands[opp]),
+            self.coins[player], self.coins[opp],
+            self.revealed, self.peek[player],
+            self.claims[player], self.claims[opp],
+            self.phase, self.pend, self.blk,
+            self.pool if self.phase == PHASE_EXCHANGE else me_h)
 
     # ------------------------------------------------------------- apply --
     def apply(self, action):

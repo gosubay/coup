@@ -6,7 +6,8 @@ import csv
 
 from .game import (CARD_NAMES, ACTION_NAMES, RESPONSE_NAMES, BLOCK_RESPONSE_NAMES,
                    PHASE_ACTION, PHASE_RESPOND, PHASE_BLOCK_RESP,
-                   PHASE_DISCARD, PHASE_EXCHANGE, claim_cards)
+                   PHASE_DISCARD, PHASE_EXCHANGE, claim_cards,
+                   pack_key, unpack_key)
 
 CARD_ID = {n.lower(): i for i, n in enumerate(CARD_NAMES)}
 ACTION_ID = {n.lower(): i for i, n in enumerate(ACTION_NAMES)}
@@ -55,11 +56,10 @@ def make_key(my_lives, opp_lives, my_coins, opp_coins, my_hand,
              revealed=(), peek=(), my_claims=0, opp_claims=0,
              phase=PHASE_ACTION, pend=None, blk=None, pool=None):
     """Build the infoset key exactly as the engine does."""
-    tail = tuple(sorted(pool)) if phase == PHASE_EXCHANGE else tuple(sorted(my_hand))
-    return (my_lives, opp_lives, my_coins, opp_coins,
-            tuple(sorted(revealed)), tuple(sorted(peek)),
-            my_claims, opp_claims,
-            phase, pend, blk, tail)
+    tail = pool if phase == PHASE_EXCHANGE else my_hand
+    return pack_key(my_lives, opp_lives, my_coins, opp_coins,
+                    revealed, peek, my_claims, opp_claims,
+                    phase, pend, blk, tail or ())
 
 
 def lookup(policy, **kw):
@@ -69,7 +69,7 @@ def lookup(policy, **kw):
     if e is None:
         return None
     actions, probs = e
-    phase = key[8]
+    phase = unpack_key(key)["phase"]
     rows = [(action_label(phase, a), p) for a, p in zip(actions, probs)]
     rows.sort(key=lambda r: -r[1])
     return rows
@@ -84,9 +84,14 @@ def export_csv(policy, path, phase=None, min_prob=0.0):
                     "face_up", "peek", "my_claims", "opp_claims",
                     "phase", "vs_action", "vs_block", "choice", "frequency"])
         for key, (actions, probs) in policy.items():
-            (ml, ol, mc, oc, rev, peek, mcl, ocl, ph, pend, blk, tail) = key
+            f = unpack_key(key)
+            ph = f["phase"]
             if phase is not None and ph != phase:
                 continue
+            ml, ol = f["my_lives"], f["opp_lives"]
+            mc, oc = f["my_coins"], f["opp_coins"]
+            rev, peek, tail = f["revealed"], f["peek"], f["hand"]
+            mcl, ocl, pend, blk = f["my_claims"], f["opp_claims"], f["pend"], f["blk"]
             for a, p in zip(actions, probs):
                 if p < min_prob:
                     continue
