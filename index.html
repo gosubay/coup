@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Coup</title>
+<link rel="icon" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/coup-icon.png">
 <style>
 /* ============================================================
    COUP — single-file card game
@@ -64,11 +66,17 @@ header.topbar{
 }
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.16em;font-size:15px}
 .brand .mark{
-  width:26px;height:26px;border-radius:7px;
-  background:linear-gradient(145deg,var(--gold2),#b8860b);
-  display:grid;place-items:center;color:#2a1d00;font-size:14px;font-weight:900;
-  box-shadow:0 2px 8px rgba(232,184,75,.35);
+  width:32px;height:32px;flex:0 0 auto;display:block;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.6));
 }
+
+/* icon watermark behind the table */
+.table-emblem{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(46%,430px);aspect-ratio:1;
+  opacity:.15;pointer-events:none;z-index:1;
+}
+.table-emblem img{width:100%;height:100%;display:block;object-fit:contain}
 .brand span.sub{font-weight:500;letter-spacing:.05em;color:var(--dim);font-size:11px}
 
 nav.tabs{display:flex;gap:4px;margin-left:8px}
@@ -336,6 +344,12 @@ nav.tabs button.on{background:var(--panel2);color:var(--gold2);border-color:var(
   min-width:340px;max-width:560px;box-shadow:0 24px 70px #000a;
 }
 .mbox h2{margin:0 0 6px;font-size:20px;letter-spacing:.02em}
+.mhead{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.mhead h2{margin:0}
+.mhead .mark-lg{
+  width:56px;height:56px;flex:0 0 auto;display:block;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.55));
+}
 .mbox p{margin:0 0 18px;color:var(--muted);font-size:13px;line-height:1.5}
 .mrow{display:flex;gap:10px;flex-wrap:wrap}
 .mrow .btn{flex:1;justify-content:center;text-align:center;padding:11px}
@@ -490,7 +504,9 @@ table.tbl tbody tr.hi td{background:#e8b84b0e}
 @media (max-width:880px){
   header.topbar{height:auto;min-height:46px;padding:6px 9px;gap:8px;flex-wrap:wrap}
   .brand{font-size:12.5px;gap:7px}
-  .brand .mark{width:22px;height:22px;font-size:12px;border-radius:6px}
+  .brand .mark{width:24px;height:24px}
+  .mhead .mark-lg{width:42px;height:42px}
+  .table-emblem{width:62%;opacity:.13}
   .brand span.sub{display:none}
   nav.tabs{order:5;width:100%;margin:0;gap:3px;overflow-x:auto;scrollbar-width:none}
   nav.tabs::-webkit-scrollbar{display:none}
@@ -591,7 +607,7 @@ table.tbl tbody tr.hi td{background:#e8b84b0e}
 
   <header class="topbar">
     <div class="brand">
-      <div class="mark">C</div>
+      <img class="mark" src="assets/coup-icon.png" alt="">
       <div>COUP <span class="sub">&nbsp;&nbsp;bluff · deduce · eliminate</span></div>
     </div>
     <nav class="tabs">
@@ -617,6 +633,7 @@ table.tbl tbody tr.hi td{background:#e8b84b0e}
   <section class="pane on" id="pane-play">
     <div class="tablewrap" id="tablewrap">
       <div class="felt-ring"></div>
+      <div class="table-emblem"><img src="assets/coup-icon.png" alt=""></div>
       <div id="seats"></div>
       <div id="meseat"></div>
       <div class="center">
@@ -1108,7 +1125,10 @@ table.tbl tbody tr.hi td{background:#e8b84b0e}
 <!-- ================= MODALS ================= -->
 <div class="modal" id="setupModal">
   <div class="mbox">
-    <h2>New Game</h2>
+    <div class="mhead">
+      <img class="mark-lg" src="assets/coup-icon.png" alt="">
+      <h2>New Game</h2>
+    </div>
     <p>One human seat, the rest are AI. Everything runs locally — no network play.</p>
     <div class="setup-grid">
       <label>Players</label>
