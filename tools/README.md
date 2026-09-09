@@ -11,11 +11,40 @@ not caught up.
 
 No dependencies -- it is standard library only, so any Python 3.8+ will do.
 
-```bash
-git clone https://github.com/gosubay/Coup.git
+The solver lives on the `claude/cfr-sims-analysis-strategy-mebgh9` branch, not
+on `main`, so clone that branch or you will get a repository with no solver in
+it. Do it somewhere you can write -- not `C:\Windows\System32`.
+
+**Windows (PowerShell):**
+
+```powershell
+cd $HOME
+git clone -b claude/cfr-sims-analysis-strategy-mebgh9 https://github.com/gosubay/Coup.git
 cd Coup
-python3 tools/solve_coup.py bench     # measure YOUR machine, ~1 minute
-tools/run.sh start
+python tools\solve_coup.py bench      # measure YOUR machine, ~1 minute
+python tools\run.py                   # run the plan
+```
+
+**macOS / Linux:**
+
+```bash
+cd ~
+git clone -b claude/cfr-sims-analysis-strategy-mebgh9 https://github.com/gosubay/Coup.git
+cd Coup
+python3 tools/solve_coup.py bench
+python3 tools/run.py                  # or tools/run.sh start to detach
+```
+
+`run.py` is the cross-platform driver and runs in the foreground; Ctrl+C is
+safe, because every stage checkpoints and re-running resumes. `run.sh` does the
+same thing detached, but it is a bash script and will not run under PowerShell.
+
+Useful flags:
+
+```
+python tools/run.py --iters 200000    # a few-minute trial before committing hours
+python tools/run.py --only base       # just the one configuration that converges
+python tools/run.py --status          # how far along, and is it flat yet
 ```
 
 `bench` times all three configurations on your hardware and projects the wall

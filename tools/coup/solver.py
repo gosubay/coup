@@ -162,10 +162,13 @@ class Solver:
                       f"{self.t/el:9.0f} it/s", flush=True)
 
             if exploit_every and exploit_fn and self.t % exploit_every == 0:
-                nc = exploit_fn(self)
+                nc, budget = exploit_fn(self)
                 self.trace.append((self.t, nc, time.time() - start))
-                print(f"  t={self.t:>10,}  NashConv={nc:+.5f}  "
-                      f"<- stop when this flattens", flush=True)
+                # The budget is part of the reading: two NashConv numbers are
+                # only comparable if the responder behind them was trained
+                # comparably. Without it the trace is not a convergence signal.
+                print(f"  t={self.t:>10,}  NashConv>={nc:.5f}  "
+                      f"(responder budget {budget:,})", flush=True)
 
             if checkpoint and checkpoint_every and self.t % checkpoint_every == 0:
                 self.save(checkpoint)

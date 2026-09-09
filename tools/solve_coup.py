@@ -140,8 +140,12 @@ def cmd_solve(a):
     exploit_fn = None
     if a.exploit_every:
         def exploit_fn(sol):
+            # The responder has to be trained in proportion to the policy it is
+            # attacking; a fixed small budget measures its own training, not the
+            # solve. See nashconv_ladder for why.
+            budget = max(a.exploit_iters, 3 * len(sol.nodes))
             return X.nashconv(gf, sol.average_strategy(),
-                              br_iters=a.exploit_iters, games=a.exploit_games)
+                              br_iters=budget, games=a.exploit_games), budget
 
     s.run(a.iters, report_every=a.report_every, checkpoint=a.out,
           checkpoint_every=a.checkpoint_every, exploit_every=a.exploit_every,
@@ -153,9 +157,19 @@ def cmd_exploit(a):
     s = Solver.load(a.solve); gf = factory_from(s.tag)
     pol = s.average_strategy()
     print(f"{a.solve}: t={s.t:,}, {len(s.nodes):,} infosets\n")
-    print(f"self-play EV to P0      {X.self_play_value(gf, pol, a.games):+.4f}")
-    print(f"NashConv (lower bound)  {X.nashconv(gf, pol, a.br_iters, a.games):+.5f}"
-          "   <- 0 means solved\n")
+    print(f"self-play EV to P0      {X.self_play_value(gf, pol, a.games):+.4f}\n")
+    print("NashConv, raising the best-responder's budget until it stops rising:")
+    budgets = tuple(b for b in (30000, 100000, 300000, 900000, 2700000)
+                    if b <= a.br_iters) or (a.br_iters,)
+    nc, ok, _rows = X.nashconv_ladder(gf, pol, budgets=budgets, games=a.games,
+                                      verbose=True)
+    if ok:
+        print(f"\n  NashConv >= {nc:.4f}   (0 means solved; the responder "
+              "plateaued, so this is a fair bound)\n")
+    else:
+        print(f"\n  NashConv >= {nc:.4f}   -- and STILL RISING at the largest "
+              "budget, so the\n  true exploitability is higher than this. Raise "
+              "--br-iters.\n")
     print("cheap deviation check:")
     for name, ev, gain in X.quick_deviations(gf, pol, games=a.games):
         print(f"  {name:<34} EV {ev:+.4f}" + ("" if gain == 0 else f"   gain {gain:+.4f}"))
@@ -246,7 +260,8 @@ def main():
 
     p = sub.add_parser("exploit")
     p.add_argument("--solve", required=True)
-    p.add_argument("--br-iters", type=int, default=50000)
+    p.add_argument("--br-iters", type=int, default=900000,
+                   help="largest best-responder budget to try")
     p.add_argument("--games", type=int, default=30000)
     p.set_defaults(fn=cmd_exploit)
 
