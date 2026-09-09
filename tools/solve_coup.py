@@ -55,6 +55,70 @@ def cmd_verify(a):
           "Coup numbers either.")
 
 
+# Tree sizes measured on this codebase; they are a property of the game, not of
+# your hardware, so they carry over. `full` is a range because it was still
+# discovering infosets when the measurement stopped.
+STAGE_PLAN = (
+    ("base",   0, 0,  20_000_000, (380_000, 380_000)),
+    ("claims", 0, 1,  60_000_000, (6_000_000, 6_000_000)),
+    ("full",   1, 1, 150_000_000, (15_000_000, 30_000_000)),
+)
+BYTES_PER_INFOSET = 443
+
+
+def cmd_bench(a):
+    """Measure this machine, then project the whole plan onto it."""
+    import platform
+    import time as _t
+
+    impl = platform.python_implementation()
+    print(f"runtime : {impl} {platform.python_version()} on {platform.machine()}")
+    if impl != "PyPy":
+        print("          (PyPy runs this same code with no changes and is "
+              "typically several times faster --")
+        print("           install it and re-run this bench to see the real "
+              "number for your machine)")
+    try:
+        with open("/proc/meminfo") as f:
+            total_gb = int(f.readline().split()[1]) / 1048576
+        print(f"memory  : {total_gb:.0f} GB")
+    except OSError:
+        total_gb = None
+    print()
+
+    # Only speed is measured here. Memory per infoset is a property of the code,
+    # not the machine, and measuring it in-process is unreliable because freed
+    # pages stay resident between configurations.
+    rates = {}
+    print(f"{'config':<10} {'it/s':>9}")
+    for name, peek, claim, _, _sz in STAGE_PLAN:
+        s = Solver(factory_from({"peek_memory": peek, "claim_memory": claim}), seed=1)
+        s.run(2000)                                   # warm up, then measure
+        t0 = _t.time(); s.run(a.iters); el = _t.time() - t0
+        rates[name] = a.iters / el
+        print(f"{name:<10} {rates[name]:>9,.0f}")
+
+    print(f"\nprojected for the full plan on this machine:")
+    print(f"  {'stage':<8} {'iters':>12} {'wall time':>11} {'peak RAM':>10}")
+    total = 0.0
+    for name, _p, _c, iters, (lo, hi) in STAGE_PLAN:
+        hours = iters / rates[name] / 3600
+        total += hours
+        gb_lo = lo * BYTES_PER_INFOSET / 1073741824
+        gb_hi = hi * BYTES_PER_INFOSET / 1073741824
+        ram = f"{gb_lo:.1f} GB" if lo == hi else f"{gb_lo:.0f}-{gb_hi:.0f} GB"
+        print(f"  {name:<8} {iters:>12,} {hours:>10.1f} h {ram:>10}")
+    print(f"  {'total':<8} {'':>12} {total:>10.1f} h")
+
+    if total_gb is not None:
+        worst = STAGE_PLAN[-1][4][1] * BYTES_PER_INFOSET / 1073741824
+        if worst > total_gb * 0.66:
+            print(f"\n  Note: `full` may not fit in {total_gb:.0f} GB. run.sh caps "
+                  f"it at {total_gb*0.66:.1f} GB and stops cleanly there;")
+            print("  `base` and `claims` are unaffected.")
+    print("\nStart with:  tools/run.sh start")
+
+
 def cmd_solve(a):
     tag = {"max_turns": a.max_turns, "peek_memory": a.peek_memory,
            "claim_memory": a.claim_memory}
@@ -153,6 +217,10 @@ def main():
 
     p = sub.add_parser("verify", help="check the solver on Kuhn poker")
     p.set_defaults(fn=cmd_verify)
+
+    p = sub.add_parser("bench", help="measure this machine and project the plan")
+    p.add_argument("--iters", type=int, default=20000)
+    p.set_defaults(fn=cmd_bench)
 
     p = sub.add_parser("solve")
     p.add_argument("--iters", type=int, default=1000000)

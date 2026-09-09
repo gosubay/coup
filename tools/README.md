@@ -7,6 +7,41 @@ five-line greedy heuristic beat it by 17 percentage points of win rate, while
 its own stored regrets already said "Coup more" and the average strategy had
 not caught up.
 
+## Running it on your own machine
+
+No dependencies -- it is standard library only, so any Python 3.8+ will do.
+
+```bash
+git clone https://github.com/gosubay/Coup.git
+cd Coup
+python3 tools/solve_coup.py bench     # measure YOUR machine, ~1 minute
+tools/run.sh start
+```
+
+`bench` times all three configurations on your hardware and projects the wall
+time and peak RAM for the whole plan, so you get real numbers instead of the
+ones measured here.
+
+### PyPy
+
+The solver is one tight pure-Python loop, which is the case PyPy is built for.
+It runs the same code with no changes and no separate build:
+
+```bash
+# macOS: brew install pypy3   |   Debian/Ubuntu: apt install pypy3
+# or download from https://pypy.org/download.html
+pypy3 tools/solve_coup.py bench       # compare this against the python3 number
+pypy3 tools/solve_coup.py solve --peek-memory 0 --claim-memory 0 --iters 20000000
+```
+
+Run `bench` under both and use whichever is faster -- the checkpoint format is
+identical, so you can even solve under PyPy and query under CPython.
+
+Two things PyPy does not change: the tree sizes and the bytes per infoset. If
+`full` does not fit in your RAM under CPython, it will not fit under PyPy
+either. Memory is the binding constraint on the big configurations; speed is
+the binding constraint on the small ones.
+
 ## Quick start
 
 One command runs the whole plan, smallest tree first, and survives logout:
