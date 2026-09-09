@@ -113,10 +113,10 @@ def cmd_bench(a):
     if total_gb is not None:
         worst = STAGE_PLAN[-1][4][1] * BYTES_PER_INFOSET / 1073741824
         if worst > total_gb * 0.66:
-            print(f"\n  Note: `full` may not fit in {total_gb:.0f} GB. run.sh caps "
-                  f"it at {total_gb*0.66:.1f} GB and stops cleanly there;")
-            print("  `base` and `claims` are unaffected.")
-    print("\nStart with:  tools/run.sh start")
+            print(f"\n  Note: `full` may not fit in {total_gb:.0f} GB. Pass "
+                  f"--max-gb {total_gb*0.66:.1f} and it will checkpoint and stop")
+            print("  cleanly there rather than being OOM-killed; `base` and "
+                  "`claims` are unaffected.")
 
 
 def cmd_solve(a):
