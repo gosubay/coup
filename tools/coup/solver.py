@@ -92,7 +92,13 @@ class Solver:
             out = st.chance_outcomes()
             j = self._pick([p for _, p in out])
             card, p = out[j]
-            u, tail = self._os(st.apply_chance(card), i, pi_i, pi_o, samp * p, weight)
+            # chance belongs in the counterfactual reach: pi_o is everything that
+            # is not the traverser. Leaving it out while 1/q still divides by it
+            # inflates every line reached through an improbable deal by the
+            # reciprocal of that deal's probability. Invisible on a game whose
+            # chance is all at the root, fatal on one that interleaves it.
+            u, tail = self._os(st.apply_chance(card), i, pi_i, pi_o * p,
+                               samp * p, weight)
             return u, tail * p
 
         p = st.current_player()
