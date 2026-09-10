@@ -29,7 +29,7 @@ from array import array
 
 class Solver:
     def __init__(self, game_factory, seed=0, epsilon=0.6, tag=None,
-                 frozen=None, frozen_player=None):
+                 frozen=None, frozen_player=None, sampling="robust", rs_k=3):
         self.game_factory = game_factory
         # When `frozen` is set, the named player plays that fixed policy and
         # never learns. Training the other player then converges to a best
@@ -46,6 +46,17 @@ class Solver:
         self.t = 0
         self.trace = []
         self.tag = tag or {}
+        # "external": enumerate the traverser's actions, sample chance and the
+        # opponent. No importance weights anywhere, so nothing can explode.
+        # "outcome": one trajectory, importance-weighted -- cheap per iteration
+        # but the weights reach 1e17 at Coup's depth and freeze the policy on
+        # early noise.
+        self.sampling = sampling
+        # robust sampling walks min(rs_k, |A|) of the traverser's actions. k>=|A|
+        # is exactly external sampling; k=1 collapses towards outcome sampling.
+        # The importance weight is bounded by (|A|/k) per traverser node instead
+        # of (|A|/epsilon), which is the whole point.
+        self.rs_k = rs_k
 
     # -------------------------------------------------------------- nodes --
     def _node(self, key, legal):
@@ -140,6 +151,71 @@ class Solver:
 
         return u, tail * sigma[a]
 
+    # ---------------------------------------------------- external sampling --
+    def _es(self, st, i, weight):
+        """External-sampling MCCFR. Returns the sampled counterfactual value.
+
+        The traverser's every action is walked, so its regrets carry no sampling
+        weight at all. Chance and the opponent are sampled from their own
+        distributions, which means the frequency with which an opponent infoset
+        is visited is already proportional to its reach -- so the average
+        strategy accumulates on-policy, with no 1/q correction to blow up.
+        """
+        if st.is_terminal():
+            return st.utility(i)
+
+        if st.is_chance():
+            out = st.chance_outcomes()
+            card, _p = out[self._pick([p for _, p in out])]
+            return self._es(st.apply_chance(card), i, weight)
+
+        p = st.current_player()
+        legal = st.legal()
+        k = len(legal)
+
+        if self.frozen is not None and p == self.frozen_player:
+            e = self.frozen.get(st.infoset_key(p))
+            sigma = e[1] if e is not None else [1.0 / k] * k
+            return self._es(st.apply(legal[self._pick(sigma)]), i, weight)
+
+        regrets, strat, _ = self._node(st.infoset_key(p), legal)
+        sigma = self._strategy(regrets)
+
+        if p != i:
+            # linear averaging: iteration t counts for t
+            for j in range(k):
+                strat[j] += weight * sigma[j]
+            return self._es(st.apply(legal[self._pick(sigma)]), i, weight)
+
+        kk = self.rs_k if self.sampling == "robust" else k
+        if kk >= k:
+            node_util = 0.0
+            util = [0.0] * k
+            for j in range(k):
+                util[j] = self._es(st.apply(legal[j]), i, weight)
+                node_util += sigma[j] * util[j]
+            for j in range(k):
+                r = regrets[j] + util[j] - node_util
+                regrets[j] = r if r > 0.0 else 0.0    # regret matching+
+            return node_util
+
+        # walk kk of the k actions, uniformly and without replacement. Each is
+        # sampled with probability kk/k, so scaling its value by k/kk keeps the
+        # estimate unbiased; an unsampled action still gets its -v(I) term.
+        picks = self.rng.sample(range(k), kk)
+        scale = k / kk
+        util = {}
+        node_util = 0.0
+        for j in picks:
+            u = self._es(st.apply(legal[j]), i, weight)
+            util[j] = u
+            node_util += sigma[j] * scale * u
+        for j in range(k):
+            adv = (scale * util[j] - node_util) if j in util else -node_util
+            r = regrets[j] + adv
+            regrets[j] = r if r > 0.0 else 0.0
+        return node_util
+
     # -------------------------------------------------------------- drive --
     @staticmethod
     def _rss_gb():
@@ -159,8 +235,12 @@ class Solver:
         for _ in range(iterations):
             self.t += 1
             w = float(self.t)
-            for i in (0, 1):
-                self._os(self.game_factory(), i, 1.0, 1.0, 1.0, w)
+            if self.sampling in ("external", "robust"):
+                for i in (0, 1):
+                    self._es(self.game_factory(), i, w)
+            else:
+                for i in (0, 1):
+                    self._os(self.game_factory(), i, 1.0, 1.0, 1.0, w)
 
             if report_every and self.t % report_every == 0:
                 el = time.time() - start
@@ -209,7 +289,8 @@ class Solver:
     def save(self, path):
         with open(path, "wb") as f:
             pickle.dump({"version": 4, "iterations": self.t, "trace": self.trace,
-                         "nodes": self.nodes,
+                         "nodes": self.nodes, "sampling": self.sampling,
+                         "rs_k": self.rs_k,
                          "tag": self.tag, "epsilon": self.epsilon},
                         f, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -217,7 +298,8 @@ class Solver:
     def load(cls, path, game_factory=None):
         with open(path, "rb") as f:
             d = pickle.load(f)
-        s = cls(game_factory, epsilon=d.get("epsilon", 0.6), tag=d.get("tag", {}))
+        s = cls(game_factory, epsilon=d.get("epsilon", 0.6), tag=d.get("tag", {}),
+                sampling=d.get("sampling", "outcome"), rs_k=d.get("rs_k", 3))
         if d.get("version", 0) < 4:
             raise SystemExit(f"{path} was written by an older, incompatible "
                              "format. Delete it and solve again.")
