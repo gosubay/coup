@@ -34,7 +34,7 @@ PHASES = {"action": PHASE_ACTION, "respond": PHASE_RESPOND,
 
 
 def factory_from(tag):
-    return functools.partial(new_game, tag.get("max_turns", 60),
+    return functools.partial(new_game, tag.get("max_turns", 12),
                              tag.get("peek_memory", 1),
                              tag.get("claim_memory", 1))
 
@@ -58,10 +58,15 @@ def cmd_verify(a):
 # Tree sizes measured on this codebase; they are a property of the game, not of
 # your hardware, so they carry over. `full` is a range because it was still
 # discovering infosets when the measurement stopped.
+# Robust sampling walks several actions per traverser node, so one iteration is
+# worth hundreds of outcome-sampling ones and the budgets are far smaller.
+# Measured on the 12-turn game with robust k=2: 3k iterations reach 78.4%
+# against a random opponent, 10k reach 80.7%, and 30k and 70k both sit at
+# 79.5%. Quality peaks around 10k, so these ceilings are generous already.
 STAGE_PLAN = (
-    ("base",   0, 0,  20_000_000, (380_000, 380_000)),
-    ("claims", 0, 1,  60_000_000, (6_000_000, 6_000_000)),
-    ("full",   1, 1, 150_000_000, (15_000_000, 30_000_000)),
+    ("base",   0, 0,  40_000, (480_000, 480_000)),
+    ("claims", 0, 1,  80_000, (3_000_000, 3_000_000)),
+    ("full",   1, 1, 150_000, (8_000_000, 16_000_000)),
 )
 BYTES_PER_INFOSET = 443
 
@@ -89,14 +94,20 @@ def cmd_bench(a):
     # Only speed is measured here. Memory per infoset is a property of the code,
     # not the machine, and measuring it in-process is unreliable because freed
     # pages stay resident between configurations.
+    # Time-boxed, not iteration-boxed: robust sampling costs hundreds of times
+    # more per iteration than outcome sampling, and the cost varies by
+    # configuration, so a fixed iteration count can take any amount of time.
     rates = {}
     print(f"{'config':<10} {'it/s':>9}")
     for name, peek, claim, _, _sz in STAGE_PLAN:
-        s = Solver(factory_from({"peek_memory": peek, "claim_memory": claim}), seed=1)
-        s.run(2000)                                   # warm up, then measure
-        t0 = _t.time(); s.run(a.iters); el = _t.time() - t0
-        rates[name] = a.iters / el
-        print(f"{name:<10} {rates[name]:>9,.0f}")
+        s = Solver(factory_from({"peek_memory": peek, "claim_memory": claim}),
+                   seed=1, sampling=a.sampling, rs_k=a.rs_k)
+        s.run(5)                                      # warm up, then measure
+        t0 = _t.time(); done = 0
+        while _t.time() - t0 < a.seconds:
+            s.run(25); done += 25
+        rates[name] = done / (_t.time() - t0)
+        print(f"{name:<10} {rates[name]:>9,.1f}")
 
     print(f"\nprojected for the full plan on this machine:")
     print(f"  {'stage':<8} {'iters':>12} {'wall time':>11} {'peak RAM':>10}")
@@ -122,12 +133,13 @@ def cmd_bench(a):
 def cmd_solve(a):
     tag = {"max_turns": a.max_turns, "peek_memory": a.peek_memory,
            "claim_memory": a.claim_memory}
+    mk = functools.partial(Solver, sampling=a.sampling, rs_k=a.rs_k)
     if a.resume and os.path.exists(a.out):
         s = Solver.load(a.out)
         s.game_factory = factory_from(s.tag)
         print(f"resuming {a.out} at t={s.t:,} ({len(s.nodes):,} infosets)")
     else:
-        s = Solver(factory_from(tag), seed=a.seed, tag=tag)
+        s = mk(factory_from(tag), seed=a.seed, tag=tag)
         print(f"new solve: max_turns={a.max_turns} peek_memory={a.peek_memory} "
               f"claim_memory={a.claim_memory}")
         print("peek_memory=1 keeps the cards you hand back in an Exchange, which "
@@ -233,14 +245,26 @@ def main():
     p.set_defaults(fn=cmd_verify)
 
     p = sub.add_parser("bench", help="measure this machine and project the plan")
-    p.add_argument("--iters", type=int, default=20000)
+    p.add_argument("--seconds", type=float, default=12.0,
+                   help="how long to time each configuration")
+    p.add_argument("--sampling", default="robust",
+                   choices=("robust", "external", "outcome"))
+    p.add_argument("--rs-k", type=int, default=2)
     p.set_defaults(fn=cmd_bench)
 
     p = sub.add_parser("solve")
     p.add_argument("--iters", type=int, default=1000000)
     p.add_argument("--out", default="coup_solve.pkl")
     p.add_argument("--resume", action="store_true")
-    p.add_argument("--max-turns", type=int, default=60)
+    p.add_argument("--max-turns", type=int, default=12,
+                   help="turn cap. 12 truncates 0.92%% of games and bounds how "
+                        "many traverser nodes one branch can hold, which is what "
+                        "makes bounded-weight sampling affordable")
+    p.add_argument("--sampling", default="robust",
+                   choices=("robust", "external", "outcome"),
+                   help="robust walks --rs-k of the traverser's actions; outcome "
+                        "walks one and is the scheme that plateaued at 61%%")
+    p.add_argument("--rs-k", type=int, default=2)
     p.add_argument("--peek-memory", type=int, default=1,
                    help="1 = remember the cards you handed back in an Exchange "
                         "(card removal); 0 = the old solve's information")

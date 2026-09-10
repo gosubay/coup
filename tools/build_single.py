@@ -27,11 +27,22 @@ runs on any Python 3.8+ and unchanged on PyPy, which is much faster for this.
     python coup_solver.py query    --solve solves/base.pkl --my-coins 7 --hand duke,assassin
     python coup_solver.py export   --solve solves/base.pkl --csv policy.csv --phase action
 
-KNOWN DEFECT -- read this before spending a night on it. The solver plateaus.
-Its policy beats a uniform-random opponent about 61% of the time while a plain
-Monte-Carlo control agent reaches 90%, and going from 10 million to 20 million
-iterations does not move that number at all. `strength` measures it. Until that
-climbs, a longer run only computes a weak strategy more precisely.
+Where this stands, measured with `strength` (win rate against a uniform-random
+opponent), because that is the number that has actually tracked reality here:
+
+    61%   outcome sampling, 20,000,000 iterations -- stuck, a fixed ceiling
+    80%   robust sampling with a 12-turn cap, 10,000 iterations -- the default
+    90%   a plain Monte-Carlo control agent, for scale
+
+Outcome sampling divides by the probability of the sampled trajectory, and at
+this game's depth that weight reached 1e17: one freak trajectory could write a
+regret nothing later could outvote, and the policy froze. Robust sampling walks
+several of the traverser's actions instead of one, which bounds the weight, and
+the turn cap bounds how many traverser nodes a branch can hold. Both are needed.
+
+80% is a real solver and 20 points better than what it replaced. It is not a
+solved game: it plateaus again around 80%, short of the Monte-Carlo agent, and
+that gap is still open.
 """
 
 from __future__ import annotations
@@ -79,15 +90,18 @@ def cmd_strength(a):
     print(f"{a.solve}: t={s.t:,}, {len(s.nodes):,} infosets")
     print(f"\\nwin rate vs uniform random   {w / a.games:6.1%}\\n")
     print("  50%   no better than random")
-    print("  61%   this solver at 20M iterations -- the known defect")
+    print("  61%   outcome sampling at 20M iterations -- the old ceiling")
+    print("  80%   robust sampling, 12-turn cap -- the current default")
     print("  90%   a plain Monte-Carlo control agent, for scale")
 
 
 def cmd_plan(a):
     """The staged plan, smallest tree first, in this one process."""
-    stages = (("base", 0, 0, 20_000_000),
-              ("claims", 0, 1, 60_000_000),
-              ("full", 1, 1, 150_000_000))
+    # robust sampling makes one iteration worth hundreds of outcome-sampling
+    # ones, so these budgets are small by comparison
+    stages = (("base", 0, 0, 40_000),
+              ("claims", 0, 1, 80_000),
+              ("full", 1, 1, 150_000))
     os.makedirs(a.out, exist_ok=True)
     for name, peek, claim, iters in stages:
         if a.only and a.only != name:
@@ -96,13 +110,15 @@ def cmd_plan(a):
             iters = a.iters
         pkl = os.path.join(a.out, name + ".pkl")
         print(f"\\n=== stage {name} (peek={peek} claim={claim}, up to {iters:,}) ===")
-        tag = {"max_turns": 60, "peek_memory": peek, "claim_memory": claim}
+        tag = {"max_turns": a.max_turns, "peek_memory": peek,
+               "claim_memory": claim}
         if a.resume and os.path.exists(pkl):
             s = Solver.load(pkl)
             s.game_factory = factory_from(s.tag)
             print(f"resuming at t={s.t:,}")
         else:
-            s = Solver(factory_from(tag), seed=0, tag=tag)
+            s = Solver(factory_from(tag), seed=0, tag=tag,
+                       sampling=a.sampling, rs_k=a.rs_k)
         try:
             s.run(iters, report_every=min(500000, max(iters // 4, 1)),
                   checkpoint=pkl,
@@ -125,7 +141,10 @@ def main():
     p.set_defaults(fn=cmd_verify)
 
     p = sub.add_parser("bench", help="measure this machine and project the plan")
-    p.add_argument("--iters", type=int, default=20000)
+    p.add_argument("--seconds", type=float, default=12.0)
+    p.add_argument("--sampling", default="robust",
+                   choices=("robust", "external", "outcome"))
+    p.add_argument("--rs-k", type=int, default=2)
     p.set_defaults(fn=cmd_bench)
 
     p = sub.add_parser("strength", help="win rate vs uniform random")
@@ -139,6 +158,10 @@ def main():
     p.add_argument("--iters", type=int, default=0, help="override the ceiling")
     p.add_argument("--resume", action="store_true")
     p.add_argument("--max-gb", type=float, default=0.0)
+    p.add_argument("--max-turns", type=int, default=12)
+    p.add_argument("--sampling", default="robust",
+                   choices=("robust", "external", "outcome"))
+    p.add_argument("--rs-k", type=int, default=2)
     p.set_defaults(fn=cmd_plan)
 
     p = sub.add_parser("solve")

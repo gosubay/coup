@@ -29,7 +29,7 @@ from array import array
 
 class Solver:
     def __init__(self, game_factory, seed=0, epsilon=0.6, tag=None,
-                 frozen=None, frozen_player=None, sampling="robust", rs_k=3):
+                 frozen=None, frozen_player=None, sampling="robust", rs_k=2):
         self.game_factory = game_factory
         # When `frozen` is set, the named player plays that fixed policy and
         # never learns. Training the other player then converges to a best
